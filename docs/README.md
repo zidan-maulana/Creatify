@@ -21,6 +21,12 @@ Setiap dokumen memiliki tanggung jawab spesifik (*single responsibility*) untuk 
 | [08_DEPLOYMENT_AND_MAINTENANCE.md](file:///c:/Documents/Projects/Creatify/docs/08_DEPLOYMENT_AND_MAINTENANCE.md) | **Deployment & Maintenance Guide** | Panduan hosting produksi (Vercel / Docker), variabel lingkungan, otomatisasi CI/CD, backup/restore database, dan emergency CLI runbook. | Disetujui |
 | [09_API_CONTRACT.md](file:///c:/Documents/Projects/Creatify/docs/09_API_CONTRACT.md) | **API Contract Document** | Format respon standar (Universal Response Envelope), spesifikasi endpoint publik & CMS, skema payload Zod, dan healthcheck. | Disetujui |
 
+### Panduan Pembagian Peran & Batasan Kerja (*Role Scopes*)
+| Berkas | Peran | Cakupan Kerja & Tanggung Jawab |
+|---|---|---|
+| [FRONTEND_JOBDESK.md](file:///c:/Documents/Projects/Creatify/docs/roles/FRONTEND_JOBDESK.md) | **Front-end Developer** | Komponen UI atomik, layout publik, 5 halaman publik, antarmuka CMS admin, validasi visual, dan integrasi Server Actions. |
+| [BACKEND_JOBDESK.md](file:///c:/Documents/Projects/Creatify/docs/roles/BACKEND_JOBDESK.md) | **Back-end Developer** | Skema database Prisma, Server Actions mutasi data, proteksi sesi middleware, pipeline media Cloudinary, dan transaksi migrasi kategori. |
+
 ---
 
 ## 2. Panduan Alur Membaca Berdasarkan Peran
@@ -32,8 +38,8 @@ flowchart TD
     Role{"Siapa Anda?"}
     
     Role -->|Pengurus / Product Owner| PO["Baca Berurutan:<br/>1. 00_PROJECT_BRIEF.md<br/>2. 01_PRD.md<br/>3. 03_INFORMATION_ARCHITECTURE.md"]
-    Role -->|Desainer UI/UX| UI["Baca Berurutan:<br/>1. 01_PRD.md<br/>2. 03_INFORMATION_ARCHITECTURE.md<br/>3. 06_CMS_SPECIFICATION.md"]
-    Role -->|Pengembang Web (Full-Stack)| DEV["Baca Berurutan:<br/>1. 02_SRS.md<br/>2. 07_DECISION_LOG.md<br/>3. 04_SYSTEM_DESIGN.md<br/>4. 05_DATABASE_DESIGN.md<br/>5. 06_CMS_SPECIFICATION.md<br/>6. 09_API_CONTRACT.md"]
+    Role -->|Front-end Developer| FE["Baca Berurutan:<br/>1. docs/roles/FRONTEND_JOBDESK.md<br/>2. 03_INFORMATION_ARCHITECTURE.md<br/>3. 06_CMS_SPECIFICATION.md<br/>4. 09_API_CONTRACT.md"]
+    Role -->|Back-end Developer| BE["Baca Berurutan:<br/>1. docs/roles/BACKEND_JOBDESK.md<br/>2. 02_SRS.md<br/>3. 05_DATABASE_DESIGN.md<br/>4. 04_SYSTEM_DESIGN.md<br/>5. 09_API_CONTRACT.md"]
     Role -->|DevOps / Tim Server| OPS["Baca Berurutan:<br/>1. 07_DECISION_LOG.md<br/>2. 04_SYSTEM_DESIGN.md<br/>3. 08_DEPLOYMENT_AND_MAINTENANCE.md"]
 ```
 

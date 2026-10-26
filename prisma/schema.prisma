@@ -1,0 +1,84 @@
+// Prisma Schema untuk Creatify Digital Portfolio
+// Sesuai Dokumen 05_DATABASE_DESIGN.md
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id                  String    @id @default(uuid()) @db.Uuid
+  email               String    @unique @db.VarChar(255)
+  passwordHash        String    @map("password_hash") @db.VarChar(255)
+  resetToken          String?   @map("reset_token") @db.VarChar(255)
+  resetTokenExpiresAt DateTime? @map("reset_token_expires_at")
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model Category {
+  id             String          @id @default(uuid()) @db.Uuid
+  name           String          @db.VarChar(100)
+  slug           String          @unique @db.VarChar(100)
+  createdAt      DateTime        @default(now()) @map("created_at")
+  updatedAt      DateTime        @updatedAt @map("updated_at")
+  portfolioItems PortfolioItem[]
+
+  @@map("categories")
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+}
+
+model PortfolioItem {
+  id             String    @id @default(uuid()) @db.Uuid
+  title          String    @db.VarChar(255)
+  slug           String    @unique @db.VarChar(255)
+  categoryId     String    @map("category_id") @db.Uuid
+  category       Category  @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  mediaType      MediaType @default(IMAGE) @map("media_type")
+  mediaUrl       String    @map("media_url") @db.Text
+  mediaPublicId  String?   @map("media_public_id") @db.VarChar(255)
+  videoUrl       String?   @map("video_url") @db.Text
+  videoEmbedUrl  String?   @map("video_embed_url") @db.Text
+  description    String?   @db.Text
+  releaseDate    String?   @map("release_date") @db.VarChar(50)
+  externalLink   String?   @map("external_link") @db.Text
+  isFeatured     Boolean   @default(false) @map("is_featured")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  @@index([categoryId])
+  @@index([isFeatured])
+  @@map("portfolio_items")
+}
+
+model TeamMember {
+  id            String   @id @default(uuid()) @db.Uuid
+  name          String   @db.VarChar(150)
+  roleTitle     String   @map("role_title") @db.VarChar(150)
+  photoUrl      String   @map("photo_url") @db.Text
+  photoPublicId String?  @map("photo_public_id") @db.VarChar(255)
+  sortOrder     Int      @default(0) @map("sort_order")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@index([sortOrder])
+  @@map("team_members")
+}
+
+model SiteSetting {
+  key       String   @id @db.VarChar(50)
+  payload   Json     @default("{}")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("site_settings")
+}

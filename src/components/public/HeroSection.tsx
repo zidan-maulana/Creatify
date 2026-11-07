@@ -19,28 +19,28 @@ export function HeroSection() {
         <div className="absolute top-[42%] left-1/2 -translate-x-1/2 -translate-y-1/2 h-[650px] w-[850px] rounded-full bg-[#3078ff]/25 blur-[150px]" />
       </div>
 
-      {/* 1. FLOATING NAVBAR (Pill Shape - Dibuat Lebih Berisi / Plump) */}
-      <header className="relative z-30 w-full pt-8 sm:pt-10 px-4 sm:px-6">
+      {/* 1. FLOATING NAVBAR (Pill Shape - Ukuran Pas & Ramping) */}
+      <header className="relative z-30 w-full pt-6 sm:pt-8 px-4 sm:px-6">
         <div className="mx-auto max-w-fit">
-          <nav className="relative flex items-center gap-5 sm:gap-9 rounded-full bg-white px-3.5 py-2.5 sm:pl-7 sm:pr-3 sm:py-3 shadow-[0_18px_45px_rgba(8,30,95,0.24)] border border-white/70 backdrop-blur-md transition-all">
+          <nav className="relative flex items-center gap-4 sm:gap-7 rounded-full bg-white px-3 py-1.5 sm:pl-6 sm:pr-2 sm:py-2 shadow-[0_12px_32px_rgba(8,30,95,0.20)] border border-white/70 backdrop-blur-md transition-all">
             {/* Logo */}
             <Link
               href="/"
-              className="flex items-center gap-2.5 text-zinc-950 hover:opacity-90 transition-opacity"
+              className="flex items-center gap-2 text-zinc-950 hover:opacity-90 transition-opacity"
             >
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#185adb] text-white shadow-sm">
+              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#185adb] text-white shadow-sm">
                 {/* Cobalt-style diamond icon */}
-                <div className="h-3.5 w-3.5 rotate-45 rounded-[2px] bg-white flex items-center justify-center">
-                  <div className="h-1.5 w-1.5 rounded-full bg-[#185adb]" />
+                <div className="h-3 w-3 rotate-45 rounded-[2px] bg-white flex items-center justify-center">
+                  <div className="h-1 w-1 rounded-full bg-[#185adb]" />
                 </div>
               </div>
-              <span className="text-[17px] font-semibold tracking-tight text-zinc-950">
+              <span className="text-[15.5px] font-semibold tracking-tight text-zinc-950">
                 Creatify
               </span>
             </Link>
 
             {/* Nav Links (Desktop) */}
-            <div className="hidden md:flex items-center gap-8 text-[14.5px] font-medium text-zinc-600">
+            <div className="hidden md:flex items-center gap-6 text-[13.5px] font-medium text-zinc-600">
               <Link
                 href="/portfolio"
                 className="hover:text-zinc-950 transition-colors"
@@ -71,11 +71,11 @@ export function HeroSection() {
             <div className="flex items-center gap-2">
               <Link
                 href="/contact"
-                className="group flex items-center gap-3 rounded-full bg-[#185adb] pl-5 pr-2 py-2 text-[14px] font-medium text-white shadow-sm hover:bg-[#1348b5] transition-all"
+                className="group flex items-center gap-2.5 rounded-full bg-[#185adb] pl-4 pr-1.5 py-1.5 text-[13px] sm:text-[13.5px] font-medium text-white shadow-sm hover:bg-[#1348b5] transition-all"
               >
                 <span>Mulai Proyek</span>
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white text-[#185adb] transition-transform duration-200 group-hover:translate-x-0.5 shadow-sm">
-                  <ArrowRight className="h-3.5 w-3.5 stroke-[2.5]" />
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white text-[#185adb] transition-transform duration-200 group-hover:translate-x-0.5 shadow-sm">
+                  <ArrowRight className="h-3 w-3 stroke-[2.5]" />
                 </span>
               </Link>
 
@@ -83,13 +83,13 @@ export function HeroSection() {
               <button
                 type="button"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="md:hidden flex h-9 w-9 items-center justify-center rounded-full text-zinc-700 hover:bg-zinc-100 transition-colors"
+                className="md:hidden flex h-8 w-8 items-center justify-center rounded-full text-zinc-700 hover:bg-zinc-100 transition-colors"
                 aria-label="Toggle navigation menu"
               >
                 {mobileMenuOpen ? (
-                  <X className="h-5 w-5" />
+                  <X className="h-4 w-4" />
                 ) : (
-                  <Menu className="h-5 w-5" />
+                  <Menu className="h-4 w-4" />
                 )}
               </button>
             </div>
@@ -133,34 +133,17 @@ export function HeroSection() {
 
       {/* 2. HERO MAIN CONTENT */}
       <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 sm:px-6 py-14 sm:py-16 text-center">
-        {/* Status Pill Badge with 3 Overlapping Avatars */}
-        <div className="inline-flex items-center gap-2.5 rounded-full bg-white/10 hover:bg-white/15 backdrop-blur-md border border-white/20 pl-2 pr-3.5 py-1.5 shadow-[0_4px_24px_rgba(0,0,0,0.06)] transition-all cursor-default">
-          <div className="flex -space-x-1.5 items-center">
-            <img
-              src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=64&h=64&q=80"
-              alt="Tim 1"
-              className="h-5 w-5 sm:h-6 sm:w-6 rounded-full object-cover ring-1.5 ring-white/80 shadow-sm"
-            />
-            <img
-              src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=64&h=64&q=80"
-              alt="Tim 2"
-              className="h-5 w-5 sm:h-6 sm:w-6 rounded-full object-cover ring-1.5 ring-white/80 shadow-sm"
-            />
-            <img
-              src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=64&h=64&q=80"
-              alt="Tim 3"
-              className="h-5 w-5 sm:h-6 sm:w-6 rounded-full object-cover ring-1.5 ring-white/80 shadow-sm"
-            />
-          </div>
+        {/* Status Pill Badge (Bersih tanpa avatar & tanpa outline) */}
+        <div className="inline-flex items-center rounded-full bg-white/15 hover:bg-white/20 backdrop-blur-md px-4 py-1.5 shadow-[0_4px_24px_rgba(0,0,0,0.06)] transition-all cursor-default">
           <span className="text-[12.5px] sm:text-[13px] font-normal tracking-normal text-white/95">
             Tersedia untuk kolaborasi dan proyek kreatif 2026/2027
           </span>
         </div>
 
-        {/* Headline: Persis 2 baris & irama jumlah kata seperti referensi (Brands and websites that / help companies grow.) */}
-        <h1 className="mt-7 sm:mt-8 max-w-4xl text-4xl sm:text-6xl md:text-7xl lg:text-[76px] font-semibold tracking-[-0.035em] text-white leading-[1.08]">
-          Desain dan media yang <br className="hidden sm:inline" />
-          membangun citra fakultas.
+        {/* Headline: Maksimal 2 baris presisi */}
+        <h1 className="mt-7 sm:mt-8 max-w-5xl text-3xl sm:text-5xl md:text-6xl lg:text-[70px] font-semibold tracking-[-0.035em] text-white leading-[1.12]">
+          <span className="block sm:whitespace-nowrap">Desain dan media yang</span>
+          <span className="block sm:whitespace-nowrap">membangun citra fakultas.</span>
         </h1>
 
         {/* Sub-headline: Persis 2 baris seimbang dengan siluet identik referensi */}

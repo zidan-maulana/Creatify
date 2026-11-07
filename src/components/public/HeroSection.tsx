@@ -9,7 +9,7 @@ export function HeroSection() {
 
   return (
     <section className="relative min-h-screen w-full overflow-hidden bg-gradient-to-b from-[#1c62f2] via-[#1655dc] to-[#1047bd] text-white flex flex-col justify-between selection:bg-white selection:text-[#1655dc]">
-      {/* Background Lighting & Soft Ambient Glows (Inspirasi Biru Cerah Poster Fasilkom) */}
+      {/* Background Lighting & Soft Ambient Glows (Biru Cerah Poster Fasilkom) */}
       <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
         {/* Top-Left Ambient Spotlight */}
         <div className="absolute -top-32 -left-32 h-[580px] w-[580px] rounded-full bg-[#5293ff]/30 blur-[130px]" />
@@ -19,28 +19,28 @@ export function HeroSection() {
         <div className="absolute top-[42%] left-1/2 -translate-x-1/2 -translate-y-1/2 h-[650px] w-[850px] rounded-full bg-[#3078ff]/25 blur-[150px]" />
       </div>
 
-      {/* 1. FLOATING NAVBAR (Pill Shape) */}
+      {/* 1. FLOATING NAVBAR (Pill Shape - Dibuat Lebih Berisi / Plump) */}
       <header className="relative z-30 w-full pt-8 sm:pt-10 px-4 sm:px-6">
         <div className="mx-auto max-w-fit">
-          <nav className="relative flex items-center gap-5 sm:gap-9 rounded-full bg-white px-3 py-2 sm:pl-6 sm:pr-2 sm:py-2 shadow-[0_14px_36px_rgba(8,30,95,0.22)] border border-white/60 backdrop-blur-md transition-all">
+          <nav className="relative flex items-center gap-5 sm:gap-9 rounded-full bg-white px-3.5 py-2.5 sm:pl-7 sm:pr-3 sm:py-3 shadow-[0_18px_45px_rgba(8,30,95,0.24)] border border-white/70 backdrop-blur-md transition-all">
             {/* Logo */}
             <Link
               href="/"
               className="flex items-center gap-2.5 text-zinc-950 hover:opacity-90 transition-opacity"
             >
-              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#185adb] text-white shadow-sm">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#185adb] text-white shadow-sm">
                 {/* Cobalt-style diamond icon */}
-                <div className="h-3 w-3 rotate-45 rounded-[2px] bg-white flex items-center justify-center">
-                  <div className="h-1 w-1 rounded-full bg-[#185adb]" />
+                <div className="h-3.5 w-3.5 rotate-45 rounded-[2px] bg-white flex items-center justify-center">
+                  <div className="h-1.5 w-1.5 rounded-full bg-[#185adb]" />
                 </div>
               </div>
-              <span className="text-[16px] font-semibold tracking-tight text-zinc-950">
+              <span className="text-[17px] font-semibold tracking-tight text-zinc-950">
                 Creatify
               </span>
             </Link>
 
             {/* Nav Links (Desktop) */}
-            <div className="hidden md:flex items-center gap-7 text-[14px] font-medium text-zinc-600">
+            <div className="hidden md:flex items-center gap-8 text-[14.5px] font-medium text-zinc-600">
               <Link
                 href="/portfolio"
                 className="hover:text-zinc-950 transition-colors"
@@ -71,11 +71,11 @@ export function HeroSection() {
             <div className="flex items-center gap-2">
               <Link
                 href="/contact"
-                className="group flex items-center gap-2.5 rounded-full bg-[#185adb] pl-4 pr-1.5 py-1.5 text-[13.5px] font-medium text-white shadow-sm hover:bg-[#1348b5] transition-all"
+                className="group flex items-center gap-3 rounded-full bg-[#185adb] pl-5 pr-2 py-2 text-[14px] font-medium text-white shadow-sm hover:bg-[#1348b5] transition-all"
               >
                 <span>Mulai Proyek</span>
-                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white text-[#185adb] transition-transform duration-200 group-hover:translate-x-0.5 shadow-sm">
-                  <ArrowRight className="h-3 w-3 stroke-[2.5]" />
+                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white text-[#185adb] transition-transform duration-200 group-hover:translate-x-0.5 shadow-sm">
+                  <ArrowRight className="h-3.5 w-3.5 stroke-[2.5]" />
                 </span>
               </Link>
 
@@ -83,13 +83,13 @@ export function HeroSection() {
               <button
                 type="button"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="md:hidden flex h-8 w-8 items-center justify-center rounded-full text-zinc-700 hover:bg-zinc-100 transition-colors"
+                className="md:hidden flex h-9 w-9 items-center justify-center rounded-full text-zinc-700 hover:bg-zinc-100 transition-colors"
                 aria-label="Toggle navigation menu"
               >
                 {mobileMenuOpen ? (
-                  <X className="h-4 w-4" />
+                  <X className="h-5 w-5" />
                 ) : (
-                  <Menu className="h-4 w-4" />
+                  <Menu className="h-5 w-5" />
                 )}
               </button>
             </div>
@@ -157,16 +157,16 @@ export function HeroSection() {
           </span>
         </div>
 
-        {/* Headline: Persis dengan ketebalan dan font referensi */}
-        <h1 className="mt-7 sm:mt-8 max-w-5xl text-4xl sm:text-6xl md:text-7xl lg:text-[76px] font-semibold tracking-[-0.035em] text-white leading-[1.08]">
-          Desain dan media kreatif yang <br className="hidden sm:inline" />
-          menggerakkan citra fakultas.
+        {/* Headline: Persis 2 baris & irama jumlah kata seperti referensi (Brands and websites that / help companies grow.) */}
+        <h1 className="mt-7 sm:mt-8 max-w-4xl text-4xl sm:text-6xl md:text-7xl lg:text-[76px] font-semibold tracking-[-0.035em] text-white leading-[1.08]">
+          Desain dan media yang <br className="hidden sm:inline" />
+          membangun citra fakultas.
         </h1>
 
-        {/* Sub-headline: Ringan, seimbang, dan terpusat */}
-        <p className="mt-5 sm:mt-6 max-w-[560px] text-base sm:text-[17px] font-normal leading-relaxed text-white/75">
-          Tim kreatif independen di lingkungan Fasilkom, merancang identitas visual,
-          media sosial, dan video berkualitas dari konsep awal hingga publikasi.
+        {/* Sub-headline: Persis 2 baris seimbang dengan siluet identik referensi */}
+        <p className="mt-5 sm:mt-6 max-w-[540px] text-base sm:text-[17px] font-normal leading-[1.6] text-white/75">
+          Studio kreatif independen Fasilkom, merancang karya visual dari <br className="hidden sm:inline" />
+          konsep awal hingga publikasi.
         </p>
 
         {/* Action Buttons: Persis gaya pill Cobalt */}

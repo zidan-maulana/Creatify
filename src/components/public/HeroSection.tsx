@@ -65,7 +65,7 @@ export function HeroSection() {
   return (
     <section
       style={{ fontFamily: "'Bricolage Grotesque', sans-serif" }}
-      className="relative w-full overflow-hidden bg-gradient-to-b from-[#1c62f2] via-[#1655dc] to-[#1047bd] text-white flex flex-col selection:bg-white selection:text-[#1655dc] rounded-b-[40px] sm:rounded-b-[56px] pb-12 sm:pb-16 shadow-[0_20px_50px_rgba(8,30,95,0.10)]"
+      className="relative w-full overflow-hidden bg-gradient-to-b from-[#1c62f2] via-[#1655dc] to-[#1047bd] text-white flex flex-col selection:bg-white selection:text-[#1655dc] rounded-b-[36px] sm:rounded-b-[48px] md:rounded-b-[54px] pb-4 sm:pb-6 shadow-[0_20px_50px_rgba(8,30,95,0.08)]"
     >
       {/* Background Lighting & Soft Ambient Glows (Biru Cerah Poster Fasilkom) */}
       <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
@@ -193,7 +193,7 @@ export function HeroSection() {
       </header>
 
       {/* 2. HERO MAIN CONTENT (Top-aligned dengan jarak proporsional dan seimbang dari navbar) */}
-      <div className="relative z-10 flex-1 flex flex-col items-center justify-start px-4 sm:px-6 pt-9 sm:pt-11 pb-4 sm:pb-6 text-center">
+      <div className="relative z-10 flex-1 flex flex-col items-center justify-start px-4 sm:px-6 pt-9 sm:pt-11 pb-0 text-center">
         {/* Status Pill Badge (Identitas Resmi Fakultas) */}
         <div className="inline-flex items-center rounded-full bg-white/12 hover:bg-white/16 backdrop-blur-md px-5 py-2 sm:px-6 sm:py-2.5 transition-all cursor-default">
           <span className="text-[13px] sm:text-[14px] font-normal tracking-normal text-white/95">
@@ -245,7 +245,7 @@ export function HeroSection() {
         </div>
 
         {/* 3. PARALLAX EXPANDING VIDEO SHOWCASE CONTAINER (Kecil di awal, membesar memenuhi layar saat scroll, tanpa shadow) */}
-        <div className="w-full px-1.5 sm:px-3 mt-14 sm:mt-20 mb-2 sm:mb-4 flex justify-center">
+        <div className="w-full px-1.5 sm:px-3 mt-14 sm:mt-20 mb-0 flex justify-center">
           <div
             ref={videoFrameRef}
             style={{

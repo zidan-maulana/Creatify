@@ -7,12 +7,14 @@ interface BrandLogoProps {
   variant?: "blue" | "white";
   shadowed?: boolean;
   textClassName?: string;
+  label?: string;
 }
 
 export function BrandLogo({
   variant = "blue",
   shadowed = false,
   textClassName,
+  label = SITE_CONFIG.name,
 }: BrandLogoProps) {
   const isBlue = variant === "blue";
 
@@ -49,7 +51,7 @@ export function BrandLogo({
           textClassName
         )}
       >
-        {SITE_CONFIG.name}
+        {label}
       </span>
     </Link>
   );

@@ -33,9 +33,47 @@ export function SmoothScroll({ children }: SmoothScrollProps) {
     const getMaxScroll = () =>
       document.documentElement.scrollHeight - window.innerHeight;
 
+    const canElementScroll = (el: HTMLElement, deltaY: number) => {
+      if (deltaY === 0) return false;
+      const { overflowY } = window.getComputedStyle(el);
+      const isScrollableY =
+        overflowY === "auto" || overflowY === "scroll" || overflowY === "overlay";
+      if (!isScrollableY || el.scrollHeight <= el.clientHeight + 1) return false;
+
+      return deltaY < 0
+        ? el.scrollTop > 0
+        : el.scrollTop + el.clientHeight < el.scrollHeight - 1;
+    };
+
+    const hasScrollableAncestor = (
+      target: EventTarget | null,
+      deltaY: number
+    ) => {
+      let el: Element | null = target instanceof Element ? target : null;
+      while (el && el !== document.documentElement) {
+        if (el instanceof HTMLElement && canElementScroll(el, deltaY)) {
+          return true;
+        }
+        el = el.parentElement;
+      }
+      return false;
+    };
+
     // 3. Tangkap wheel mouse dan hitung jarak perpindahan dengan momentum
     const onWheel = (e: WheelEvent) => {
       if (e.ctrlKey) return; // Izinkan zoom browser dengan Ctrl + Scroll
+
+      const modalOpen = Boolean(document.querySelector('[aria-modal="true"]'));
+      const scrollableAncestor = hasScrollableAncestor(e.target, e.deltaY);
+
+      if (modalOpen || scrollableAncestor) {
+        // Saat modal terbuka tetapi target sudah di ujung scroll / di backdrop,
+        // tahan agar halaman di belakang modal tidak ikut bergeser.
+        if (modalOpen && !scrollableAncestor) {
+          e.preventDefault();
+        }
+        return;
+      }
 
       e.preventDefault();
 

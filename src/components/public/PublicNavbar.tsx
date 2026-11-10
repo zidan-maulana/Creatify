@@ -6,6 +6,7 @@ import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { BrandLogo } from "@/components/ui/BrandLogo";
 import { AnimatedArrowBadge } from "@/components/ui/AnimatedArrowBadge";
+import { DEFAULT_SITE_SETTINGS } from "@/config/landing-cms";
 
 export type LandingSectionId =
   | "beranda"
@@ -20,6 +21,8 @@ interface PublicNavbarProps {
   activeSection?: string;
   isScrolled?: boolean;
   shadowed?: boolean;
+  brandName?: string;
+  ctaLabel?: string;
   onNavigateSection?: (sectionId: LandingSectionId) => void;
 }
 
@@ -28,6 +31,8 @@ export function PublicNavbar({
   activeSection = "beranda",
   isScrolled = false,
   shadowed = false,
+  brandName = DEFAULT_SITE_SETTINGS.name,
+  ctaLabel = DEFAULT_SITE_SETTINGS.navbarCtaLabel,
   onNavigateSection,
 }: PublicNavbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -97,7 +102,7 @@ export function PublicNavbar({
           )}
         >
           {/* Logo */}
-          <BrandLogo variant="blue" shadowed={shadowed} />
+          <BrandLogo variant="blue" label={brandName} shadowed={shadowed} />
 
           {/* Navigasi desktop */}
           <div className="hidden md:flex items-center gap-7 px-2.5 sm:px-3.5 text-[14px]">
@@ -185,7 +190,7 @@ export function PublicNavbar({
                   shadowed && "shadow-sm"
                 )}
               >
-                <span>Jelajahi Portofolio</span>
+                <span>{ctaLabel}</span>
                 <AnimatedArrowBadge
                   size="sm"
                   variant="white"
@@ -200,7 +205,7 @@ export function PublicNavbar({
                   shadowed && "shadow-sm"
                 )}
               >
-                <span>Jelajahi Portofolio</span>
+                <span>{ctaLabel}</span>
                 <AnimatedArrowBadge
                   size="sm"
                   variant="white"

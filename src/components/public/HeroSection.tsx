@@ -4,8 +4,21 @@ import React, { useState, useEffect, useRef } from "react";
 import { Play, Pause } from "lucide-react";
 import { AnimatedArrowBadge } from "@/components/ui/AnimatedArrowBadge";
 import { PublicNavbar, LandingSectionId } from "@/components/public/PublicNavbar";
+import {
+  DEFAULT_LANDING_CONTENT,
+  DEFAULT_SITE_SETTINGS,
+} from "@/config/landing-cms";
+import type { HeroContent, SiteSettingsContent } from "@/types/cms";
 
-export function HeroSection() {
+interface HeroSectionProps {
+  content?: HeroContent;
+  siteSettings?: SiteSettingsContent;
+}
+
+export function HeroSection({
+  content = DEFAULT_LANDING_CONTENT.hero,
+  siteSettings = DEFAULT_SITE_SETTINGS,
+}: HeroSectionProps) {
   const [isPlaying, setIsPlaying] = useState(true);
   const [activeSection, setActiveSection] = useState<string>("beranda");
   const [isScrolled, setIsScrolled] = useState<boolean>(false);
@@ -22,7 +35,7 @@ export function HeroSection() {
       videoRef.current.pause();
       setIsPlaying(false);
     } else {
-      videoRef.current.play();
+      void videoRef.current.play().catch(() => undefined);
       setIsPlaying(true);
     }
   };
@@ -57,9 +70,22 @@ export function HeroSection() {
   useEffect(() => {
     let ticking = false;
     let lastScale = -1;
-    let lastEase = -1;
+    let lastWhiteStage: boolean | null = null;
     let lastScrolled: boolean | null = null;
     let lastActive = "";
+    let scrollRafId: number | null = null;
+    let outerRafId: number | null = null;
+    let innerRafId: number | null = null;
+
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+    const colorTransition = prefersReducedMotion
+      ? "none"
+      : "background-color 500ms cubic-bezier(0.4, 0, 0.2, 1)";
+    const opacityTransition = prefersReducedMotion
+      ? "none"
+      : "opacity 500ms cubic-bezier(0.4, 0, 0.2, 1)";
 
     const updateParallax = () => {
       if (!videoContainerRef.current || !videoFrameRef.current) {
@@ -81,29 +107,22 @@ export function HeroSection() {
         lastScale = scale;
       }
 
-      // Interpolasi warna kanvas biru ke putih saat scroll melewati hero
-      const transitionDistance = 520;
-      const scrollPast = Math.max(60 - rect.top, 0);
-      const rawProgress = Math.min(scrollPast / transitionDistance, 1);
-      const ease = Number(
-        (rawProgress * rawProgress * (3 - 2 * rawProgress)).toFixed(4)
-      );
-
-      if (ease !== lastEase) {
-        const r = Math.round(24 + (255 - 24) * ease);
-        const g = Math.round(90 + (255 - 90) * ease);
-        const b = Math.round(219 + (255 - 219) * ease);
-
+      // Transisi mulus biru <-> putih dimulai ketika card video hampir selesai terlewati
+      const triggerBottom = Math.min(windowHeight * 0.4, rect.height * 0.36);
+      const nextIsWhiteStage = rect.bottom <= triggerBottom;
+      if (nextIsWhiteStage !== lastWhiteStage) {
+        const nextBgColor = nextIsWhiteStage ? "#ffffff" : "#185adb";
         const canvas = document.getElementById("landing-canvas");
         if (canvas) {
-          canvas.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
+          canvas.dataset.stage = nextIsWhiteStage ? "light" : "blue";
+          canvas.style.backgroundColor = nextBgColor;
         }
-        document.body.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
+        document.body.style.backgroundColor = nextBgColor;
 
         if (glowRef.current) {
-          glowRef.current.style.opacity = `${(1 - ease).toFixed(3)}`;
+          glowRef.current.style.opacity = nextIsWhiteStage ? "0" : "1";
         }
-        lastEase = ease;
+        lastWhiteStage = nextIsWhiteStage;
       }
 
       // Perbarui status navbar & active scroll spy hanya jika berubah
@@ -152,7 +171,7 @@ export function HeroSection() {
 
     const onScroll = () => {
       if (!ticking) {
-        window.requestAnimationFrame(updateParallax);
+        scrollRafId = window.requestAnimationFrame(updateParallax);
         ticking = true;
       }
     };
@@ -161,9 +180,33 @@ export function HeroSection() {
     window.addEventListener("resize", onScroll, { passive: true });
     updateParallax();
 
+    // Aktifkan transisi CSS setelah frame awal agar posisi scroll langsung akurat tanpa kedipan
+    outerRafId = window.requestAnimationFrame(() => {
+      innerRafId = window.requestAnimationFrame(() => {
+        const canvas = document.getElementById("landing-canvas");
+        if (canvas) {
+          canvas.style.transition = colorTransition;
+          canvas.dataset.stageReady = "true";
+        }
+        document.body.style.transition = colorTransition;
+        if (glowRef.current) {
+          glowRef.current.style.transition = opacityTransition;
+        }
+      });
+    });
+
     return () => {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
+      if (scrollRafId !== null) window.cancelAnimationFrame(scrollRafId);
+      if (outerRafId !== null) window.cancelAnimationFrame(outerRafId);
+      if (innerRafId !== null) window.cancelAnimationFrame(innerRafId);
+      const canvas = document.getElementById("landing-canvas");
+      if (canvas) {
+        canvas.style.transition = "";
+        delete canvas.dataset.stageReady;
+      }
+      document.body.style.transition = "";
       document.body.style.backgroundColor = "";
     };
   }, []);
@@ -171,7 +214,7 @@ export function HeroSection() {
   return (
     <section
       style={{
-        fontFamily: "'Bricolage Grotesque', sans-serif",
+        fontFamily: "var(--font-bricolage), sans-serif",
         backgroundColor: "transparent",
       }}
       className="relative w-full overflow-hidden text-white flex flex-col selection:bg-[#1655dc] selection:text-white pb-6 sm:pb-8"
@@ -193,6 +236,8 @@ export function HeroSection() {
         activeSection={activeSection}
         isScrolled={isScrolled}
         shadowed={false}
+        brandName={siteSettings.name}
+        ctaLabel={siteSettings.navbarCtaLabel}
         onNavigateSection={handleNavigateSection}
       />
 
@@ -203,20 +248,23 @@ export function HeroSection() {
         {/* Status Badge */}
         <div className="inline-flex items-center rounded-full border-[1.5px] border-white/80 bg-transparent px-5 py-2 sm:px-6 sm:py-2.5 transition-colors cursor-default">
           <span className="text-[13px] sm:text-[14px] font-normal tracking-normal text-white">
-            Komunitas Resmi di Bawah Naungan Fakultas Ilmu Komputer
+            {content.badgeText}
           </span>
         </div>
 
         {/* Primary Headline */}
         <h1 className="mt-6 sm:mt-7 max-w-5xl xl:max-w-6xl text-[30px] sm:text-[48px] md:text-[58px] lg:text-[70px] xl:text-[74px] font-medium tracking-[-0.03em] text-white leading-[1.1]">
-          <span className="block sm:whitespace-nowrap">Desain dan media kreatif yang</span>
-          <span className="block sm:whitespace-nowrap">membangun citra fakultas.</span>
+          <span className="block sm:whitespace-nowrap">
+            {content.headlineLine1}
+          </span>
+          <span className="block sm:whitespace-nowrap">
+            {content.headlineLine2}
+          </span>
         </h1>
 
         {/* Sub-headline */}
-        <p className="mt-5 sm:mt-6 max-w-[540px] text-base sm:text-[17px] font-normal leading-[1.6] text-white/75">
-          Studio kreatif independen Fasilkom, merancang karya visual dari <br className="hidden sm:inline" />
-          konsep awal hingga publikasi.
+        <p className="mt-5 sm:mt-6 max-w-[540px] text-base sm:text-[17px] font-normal leading-[1.6] text-white/75 sm:whitespace-pre-line">
+          {content.subheadline}
         </p>
 
         {/* Action Buttons */}
@@ -229,7 +277,7 @@ export function HeroSection() {
             }}
             className="group flex w-full sm:w-auto items-center justify-between gap-3.5 rounded-full bg-white pl-6 pr-2 py-2 text-[15px] font-medium text-zinc-950 shadow-[0_12px_30px_rgba(6,25,80,0.18)] hover:bg-zinc-100 transition-colors duration-200 cursor-pointer select-none"
           >
-            <span>Tertarik Bergabung?</span>
+            <span>{content.primaryCtaLabel}</span>
             <AnimatedArrowBadge variant="blue" shadowed />
           </a>
 
@@ -241,7 +289,7 @@ export function HeroSection() {
             }}
             className="group flex w-full sm:w-auto items-center justify-between gap-3.5 rounded-full bg-[#255fdc]/55 hover:bg-[#255fdc]/75 backdrop-blur-md border border-white/20 pl-6 pr-2 py-2 text-[15px] font-medium text-white shadow-sm transition-colors duration-200 cursor-pointer select-none"
           >
-            <span>Tentang Creatify</span>
+            <span>{content.secondaryCtaLabel}</span>
             <AnimatedArrowBadge variant="white" shadowed />
           </a>
         </div>
@@ -268,10 +316,9 @@ export function HeroSection() {
               muted
               playsInline
               preload="metadata"
-              poster="https://images.unsplash.com/photo-1531403009284-440f080d1e12?auto=format&fit=crop&w=1600&q=80"
               className="h-full w-full object-cover"
             >
-              <source src="/videos/showcase.mp4" type="video/mp4" />
+              <source src={content.videoUrl} type="video/mp4" />
             </video>
 
             {/* Subtle Glass Tint Gradient Overlay */}

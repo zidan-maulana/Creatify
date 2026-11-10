@@ -5,36 +5,43 @@ import { PortfolioSection } from "@/components/public/PortfolioSection";
 import { ServicesSection } from "@/components/public/ServicesSection";
 import { FaqSection } from "@/components/public/FaqSection";
 import { ContactSection } from "@/components/public/ContactSection";
+import { getLandingContent } from "@/lib/cms";
 
-export default function Home() {
+export default async function Home() {
+  const content = await getLandingContent();
+
   return (
     <main
       id="landing-canvas"
+      data-stage="blue"
       style={{
         backgroundColor: "#185adb",
       }}
       className="min-h-screen w-full text-zinc-950"
     >
       {/* Hero section & video parallax */}
-      <HeroSection />
+      <HeroSection content={content.hero} siteSettings={content.siteSettings} />
 
       {/* Marquee logo mitra */}
-      <LogoMarquee />
+      <LogoMarquee content={content.marquee} />
 
       {/* About section & akses tim */}
-      <AboutSection />
+      <AboutSection content={content.about} />
 
       {/* Portofolio divisi kreatif */}
-      <PortfolioSection />
+      <PortfolioSection items={content.divisions} />
 
       {/* Layanan & showcase karya */}
-      <ServicesSection />
+      <ServicesSection content={content.services} />
 
       {/* FAQ tanya jawab Creatify */}
-      <FaqSection />
+      <FaqSection content={content.faq} siteSettings={content.siteSettings} />
 
       {/* Section rekrutmen, kontak & footer */}
-      <ContactSection />
+      <ContactSection
+        content={content.contact}
+        siteSettings={content.siteSettings}
+      />
     </main>
   );
 }

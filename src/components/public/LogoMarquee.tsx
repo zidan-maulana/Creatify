@@ -1,6 +1,8 @@
 "use client";
 
 import React from "react";
+import { DEFAULT_LANDING_CONTENT } from "@/config/landing-cms";
+import type { MarqueeContent } from "@/types/cms";
 
 // Koleksi logo mitra abstrak untuk marquee landing page
 const PARTNER_LOGOS = [
@@ -9,7 +11,7 @@ const PARTNER_LOGOS = [
     node: (
       <div className="flex items-center gap-3 select-none">
         <svg
-          className="w-7 h-7 text-zinc-900"
+          className="w-7 h-7 stage-marquee-logo stage-sync"
           viewBox="0 0 28 28"
           fill="none"
           stroke="currentColor"
@@ -18,7 +20,7 @@ const PARTNER_LOGOS = [
           <circle cx="10" cy="14" r="7" stroke="currentColor" />
           <circle cx="18" cy="14" r="7" stroke="currentColor" />
         </svg>
-        <span className="text-[23px] sm:text-[26px] font-bold tracking-tight text-zinc-900">
+        <span className="text-[23px] sm:text-[26px] font-bold tracking-tight stage-marquee-logo stage-sync">
           Forma
         </span>
       </div>
@@ -29,7 +31,7 @@ const PARTNER_LOGOS = [
     node: (
       <div className="flex items-center gap-3 select-none">
         <svg
-          className="w-7 h-7 text-zinc-900"
+          className="w-7 h-7 stage-marquee-logo stage-sync"
           viewBox="0 0 28 28"
           fill="none"
           stroke="currentColor"
@@ -40,7 +42,7 @@ const PARTNER_LOGOS = [
           <path d="M14 3L3 23h22L14 3z" />
           <path d="M14 12v11" />
         </svg>
-        <span className="text-[23px] sm:text-[26px] font-bold tracking-tight text-zinc-900">
+        <span className="text-[23px] sm:text-[26px] font-bold tracking-tight stage-marquee-logo stage-sync">
           Vertex
         </span>
       </div>
@@ -51,12 +53,12 @@ const PARTNER_LOGOS = [
     node: (
       <div className="flex items-center gap-3 select-none">
         <div className="flex items-center gap-1.5 h-7">
-          <span className="w-1.5 h-4 rounded-full bg-[#185adb]" />
-          <span className="w-1.5 h-7 rounded-full bg-[#185adb]" />
-          <span className="w-1.5 h-5 rounded-full bg-[#185adb]" />
-          <span className="w-1.5 h-3 rounded-full bg-[#185adb]" />
+          <span className="w-1.5 h-4 rounded-full stage-marquee-accent-bg stage-sync" />
+          <span className="w-1.5 h-7 rounded-full stage-marquee-accent-bg stage-sync" />
+          <span className="w-1.5 h-5 rounded-full stage-marquee-accent-bg stage-sync" />
+          <span className="w-1.5 h-3 rounded-full stage-marquee-accent-bg stage-sync" />
         </div>
-        <span className="text-[23px] sm:text-[26px] font-bold tracking-tight text-zinc-900">
+        <span className="text-[23px] sm:text-[26px] font-bold tracking-tight stage-marquee-logo stage-sync">
           Kinetix
         </span>
       </div>
@@ -67,7 +69,7 @@ const PARTNER_LOGOS = [
     node: (
       <div className="flex items-center gap-3 select-none">
         <svg
-          className="w-7 h-7 text-zinc-900"
+          className="w-7 h-7 stage-marquee-logo stage-sync"
           viewBox="0 0 28 28"
           fill="none"
           stroke="currentColor"
@@ -84,7 +86,7 @@ const PARTNER_LOGOS = [
           <line x1="19.5" y1="12" x2="19.5" y2="16" />
           <line x1="12" y1="19.5" x2="16" y2="19.5" />
         </svg>
-        <span className="text-[23px] sm:text-[26px] font-bold tracking-tight text-zinc-900">
+        <span className="text-[23px] sm:text-[26px] font-bold tracking-tight stage-marquee-logo stage-sync">
           Nexus
         </span>
       </div>
@@ -95,10 +97,10 @@ const PARTNER_LOGOS = [
     node: (
       <div className="flex items-center gap-3 select-none">
         <div className="relative w-7 h-7 flex items-center justify-center">
-          <div className="absolute w-7 h-7 rounded-full border-[2.5px] border-zinc-900" />
-          <div className="absolute w-3 h-3 rounded-full bg-zinc-900" />
+          <div className="absolute w-7 h-7 rounded-full border-[2.5px] stage-marquee-logo-border stage-sync" />
+          <div className="absolute w-3 h-3 rounded-full stage-marquee-logo-bg stage-sync" />
         </div>
-        <span className="text-[23px] sm:text-[26px] font-bold tracking-tight text-zinc-900">
+        <span className="text-[23px] sm:text-[26px] font-bold tracking-tight stage-marquee-logo stage-sync">
           Aura
         </span>
       </div>
@@ -109,7 +111,7 @@ const PARTNER_LOGOS = [
     node: (
       <div className="flex items-center gap-3 select-none">
         <svg
-          className="w-7 h-7 text-zinc-900"
+          className="w-7 h-7 stage-marquee-logo stage-sync"
           viewBox="0 0 28 28"
           fill="none"
           stroke="currentColor"
@@ -121,7 +123,7 @@ const PARTNER_LOGOS = [
           <polyline points="4,8.5 14,14 24,8.5" />
           <line x1="14" y1="14" x2="14" y2="25" />
         </svg>
-        <span className="text-[23px] sm:text-[26px] font-bold tracking-tight text-zinc-900">
+        <span className="text-[23px] sm:text-[26px] font-bold tracking-tight stage-marquee-logo stage-sync">
           Onyx
         </span>
       </div>
@@ -132,10 +134,10 @@ const PARTNER_LOGOS = [
     node: (
       <div className="flex items-center gap-3 select-none">
         <div className="flex items-center gap-1.5 h-7">
-          <div className="w-2.5 h-7 rounded-[4px] bg-zinc-900" />
-          <div className="w-2.5 h-5 rounded-[4px] bg-zinc-900" />
+          <div className="w-2.5 h-7 rounded-[4px] stage-marquee-logo-bg stage-sync" />
+          <div className="w-2.5 h-5 rounded-[4px] stage-marquee-logo-bg stage-sync" />
         </div>
-        <span className="text-[23px] sm:text-[26px] font-bold tracking-tight text-zinc-900">
+        <span className="text-[23px] sm:text-[26px] font-bold tracking-tight stage-marquee-logo stage-sync">
           Monolith
         </span>
       </div>
@@ -146,12 +148,12 @@ const PARTNER_LOGOS = [
     node: (
       <div className="flex items-center gap-3 select-none">
         <svg
-          className="w-7 h-7 text-zinc-900 fill-zinc-900"
+          className="w-7 h-7 stage-marquee-logo-fill stage-sync"
           viewBox="0 0 28 28"
         >
           <path d="M14 2L16.8 11.2L26 14L16.8 16.8L14 26L11.2 16.8L2 14L11.2 11.2L14 2Z" />
         </svg>
-        <span className="text-[23px] sm:text-[26px] font-bold tracking-tight text-zinc-900">
+        <span className="text-[23px] sm:text-[26px] font-bold tracking-tight stage-marquee-logo stage-sync">
           Astral
         </span>
       </div>
@@ -159,13 +161,19 @@ const PARTNER_LOGOS = [
   },
 ];
 
-export function LogoMarquee() {
+interface LogoMarqueeProps {
+  content?: MarqueeContent;
+}
+
+export function LogoMarquee({
+  content = DEFAULT_LANDING_CONTENT.marquee,
+}: LogoMarqueeProps) {
   return (
     <section className="relative w-full overflow-hidden bg-transparent pt-5 sm:pt-7 pb-6 sm:pb-8">
       {/* Label kemitraan fakultas */}
       <div className="text-center px-4 mb-6 sm:mb-8">
-        <p className="text-[13px] sm:text-[14.5px] font-medium tracking-tight text-zinc-600">
-          Dipercaya oleh Fakultas Ilmu Komputer — Universitas Mercu Buana
+        <p className="text-[13px] sm:text-[14.5px] font-medium tracking-tight stage-marquee-label stage-sync">
+          {content.trustLabel}
         </p>
       </div>
 

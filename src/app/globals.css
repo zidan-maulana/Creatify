@@ -1,9 +1,7 @@
-@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&display=swap');
 @import "tailwindcss";
 
-@theme {
-  --font-sans: 'Bricolage Grotesque', sans-serif;
-  --font-bricolage: 'Bricolage Grotesque', sans-serif;
+@theme inline {
+  --font-sans: var(--font-bricolage), sans-serif;
 }
 
 :root {
@@ -12,7 +10,7 @@
 }
 
 *, ::before, ::after {
-  font-family: 'Bricolage Grotesque', sans-serif;
+  font-family: var(--font-bricolage), sans-serif;
 }
 
 html {
@@ -22,7 +20,7 @@ html {
 body {
   background-color: #185adb;
   color: #ffffff;
-  font-family: 'Bricolage Grotesque', sans-serif;
+  font-family: var(--font-bricolage), sans-serif;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -82,6 +80,91 @@ body {
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+.modal-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(12, 15, 29, 0.16) transparent;
+}
+
+.modal-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.modal-scrollbar::-webkit-scrollbar-thumb {
+  background-color: rgba(12, 15, 29, 0.16);
+  border-radius: 9999px;
+}
+
+.modal-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(12, 15, 29, 0.28);
+}
+
+#landing-canvas {
+  --stage-fg: #0c0f1d;
+  --stage-muted: #71717a;
+  --marquee-label: #52525b;
+  --marquee-logo: #18181b;
+  --marquee-accent: #185adb;
+}
+
+#landing-canvas[data-stage="blue"] {
+  --stage-fg: #ffffff;
+  --stage-muted: rgba(255, 255, 255, 0.8);
+  --marquee-label: rgba(255, 255, 255, 0.8);
+  --marquee-logo: #ffffff;
+  --marquee-accent: #ffffff;
+}
+
+#landing-canvas[data-stage-ready="true"] .stage-sync {
+  transition:
+    color 500ms cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 500ms cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 500ms cubic-bezier(0.4, 0, 0.2, 1),
+    fill 500ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #landing-canvas[data-stage-ready="true"] .stage-sync {
+    transition: none;
+  }
+}
+
+.stage-fg {
+  color: var(--stage-fg, #0c0f1d);
+}
+
+.stage-muted {
+  color: var(--stage-muted, #71717a);
+}
+
+.stage-marquee-label {
+  color: var(--marquee-label, #52525b);
+}
+
+.stage-marquee-logo {
+  color: var(--marquee-logo, #18181b);
+}
+
+.stage-marquee-logo-fill {
+  color: var(--marquee-logo, #18181b);
+  fill: var(--marquee-logo, #18181b);
+}
+
+.stage-marquee-logo-bg {
+  background-color: var(--marquee-logo, #18181b);
+}
+
+.stage-marquee-logo-border {
+  border-color: var(--marquee-logo, #18181b);
+}
+
+.stage-marquee-accent-bg {
+  background-color: var(--marquee-accent, #185adb);
 }
 
 

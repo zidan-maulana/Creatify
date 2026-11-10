@@ -1,110 +1,68 @@
 "use client";
 
 import React, { useState } from "react";
+import { DEFAULT_LANDING_CONTENT } from "@/config/landing-cms";
+import type { DivisionCardContent, DivisionCardIconKey } from "@/types/cms";
 
-interface PortfolioCategory {
-  id: string;
-  title: string;
-  collapsedTitle: string;
-  description: string;
-  tagRow1: string;
-  tagRow2: string;
-  tagMore: string;
-  image: string;
-  icon: React.ReactNode;
+const DIVISION_ICONS: Record<DivisionCardIconKey, React.ReactNode> = {
+  smile: (
+    <svg
+      className="h-7 w-7 sm:h-8 sm:w-8 text-zinc-900"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.9"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="12" cy="12" r="10" />
+      <path d="M8 9.5c.6-.6 1.4-.6 2 0" />
+      <circle cx="15.5" cy="9.75" r="0.85" fill="currentColor" stroke="none" />
+      <path d="M8.5 14.5c1 1.8 3 2.5 5 1.8 1-.3 1.6-.9 2-1.8" />
+    </svg>
+  ),
+  video: (
+    <svg
+      className="h-7 w-7 sm:h-8 sm:w-8 text-zinc-900"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.9"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="m22 8-6 4 6 4V8z" />
+      <rect x="2" y="6" width="14" height="12" rx="2" />
+    </svg>
+  ),
+  share: (
+    <svg
+      className="h-7 w-7 sm:h-8 sm:w-8 text-zinc-900"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.9"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="18" cy="5" r="3" />
+      <circle cx="6" cy="12" r="3" />
+      <circle cx="18" cy="19" r="3" />
+      <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+      <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+    </svg>
+  ),
+};
+
+interface PortfolioSectionProps {
+  items?: DivisionCardContent[];
 }
 
-const CATEGORIES: PortfolioCategory[] = [
-  {
-    id: "desain-grafis",
-    title: "Divisi Desain Grafis",
-    collapsedTitle: "Desain Grafis",
-    description:
-      "Merumuskan identitas visual, panduan grafis resmi, desain feed media sosial, poster event, hingga perlengkapan publikasi kreatif fakultas.",
-    tagRow1: "Identitas Visual",
-    tagRow2: "Poster & Banner",
-    tagMore: "+more",
-    image:
-      "https://images.unsplash.com/photo-1626785774573-4b799315345d?auto=format&fit=crop&w=1200&q=80",
-    icon: (
-      /* Ikon senyum */
-      <svg
-        className="h-7 w-7 sm:h-8 sm:w-8 text-zinc-900"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.9"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <circle cx="12" cy="12" r="10" />
-        <path d="M8 9.5c.6-.6 1.4-.6 2 0" />
-        <circle cx="15.5" cy="9.75" r="0.85" fill="currentColor" stroke="none" />
-        <path d="M8.5 14.5c1 1.8 3 2.5 5 1.8 1-.3 1.6-.9 2-1.8" />
-      </svg>
-    ),
-  },
-  {
-    id: "video-editing",
-    title: "Divisi Multimedia & Video",
-    collapsedTitle: "Multimedia",
-    description:
-      "Menggarap produksi video sinematik, aftermovie kegiatan fakultas, konten video vertikal interaktif, serta motion design dinamis berstandar tinggi.",
-    tagRow1: "Aftermovie Event",
-    tagRow2: "Motion Graphic",
-    tagMore: "+more",
-    image:
-      "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?auto=format&fit=crop&w=1200&q=80",
-    icon: (
-      /* Ikon video */
-      <svg
-        className="h-7 w-7 sm:h-8 sm:w-8 text-zinc-900"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.9"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="m22 8-6 4 6 4V8z" />
-        <rect x="2" y="6" width="14" height="12" rx="2" />
-      </svg>
-    ),
-  },
-  {
-    id: "social-media",
-    title: "Divisi Media Sosial",
-    collapsedTitle: "Media Sosial",
-    description:
-      "Mengelola ekosistem publikasi digital, menyusun kurasi konten terstruktur, copywriting komunikatif, serta strategi interaktif bersama civitas akademika.",
-    tagRow1: "Strategi Konten",
-    tagRow2: "Engagement",
-    tagMore: "+more",
-    image:
-      "https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?auto=format&fit=crop&w=1200&q=80",
-    icon: (
-      /* Ikon jejaring sosial */
-      <svg
-        className="h-7 w-7 sm:h-8 sm:w-8 text-zinc-900"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.9"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <circle cx="18" cy="5" r="3" />
-        <circle cx="6" cy="12" r="3" />
-        <circle cx="18" cy="19" r="3" />
-        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
-        <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
-      </svg>
-    ),
-  },
-];
-
-export function PortfolioSection() {
+export function PortfolioSection({
+  items = DEFAULT_LANDING_CONTENT.divisions,
+}: PortfolioSectionProps) {
   const [activeIndex, setActiveIndex] = useState(0);
+  const safeActiveIndex = activeIndex < items.length ? activeIndex : 0;
 
   return (
     <section
@@ -114,8 +72,9 @@ export function PortfolioSection() {
       <div className="mx-auto max-w-[1360px]">
         {/* Card interaktif divisi kreatif */}
         <div className="flex flex-col md:flex-row gap-4 sm:gap-5 h-auto md:h-[520px] lg:h-[550px] xl:h-[570px] w-full">
-          {CATEGORIES.map((cat, index) => {
-            const isActive = index === activeIndex;
+          {items.map((cat, index) => {
+            const isActive = index === safeActiveIndex;
+            const icon = DIVISION_ICONS[cat.iconKey] ?? DIVISION_ICONS.smile;
 
             return (
               <div
@@ -142,7 +101,7 @@ export function PortfolioSection() {
                     {/* Panel informasi divisi */}
                     <div className="flex flex-col justify-between w-full md:w-[295px] lg:w-[325px] xl:w-[350px] h-full shrink-0">
                       <div className="pt-2 pl-2 shrink-0">
-                        {cat.icon}
+                        {icon}
                       </div>
 
                       <div className="animate-card-content-up w-full rounded-[20px] sm:rounded-[22px] bg-[#f2f3f5] p-5 sm:p-6 flex flex-col justify-start">
@@ -187,7 +146,7 @@ export function PortfolioSection() {
                   /* Tampilan kartu collapsed */
                   <div className="flex flex-col justify-between items-start h-full w-full">
                     <div className="pt-2 pl-2 shrink-0">
-                      {cat.icon}
+                      {icon}
                     </div>
 
                     <div className="w-full">

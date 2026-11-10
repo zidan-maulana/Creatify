@@ -1,12 +1,23 @@
 import type { Metadata } from "next";
+import localFont from "next/font/local";
 import "./globals.css";
 import { SmoothScroll } from "@/components/providers/SmoothScroll";
-import { SITE_CONFIG } from "@/config/site";
+import { getSiteSettings } from "@/lib/cms";
 
-export const metadata: Metadata = {
-  title: SITE_CONFIG.title,
-  description: SITE_CONFIG.description,
-};
+const bricolageGrotesque = localFont({
+  src: "./fonts/bricolage-grotesque-latin.woff2",
+  variable: "--font-bricolage",
+  weight: "200 800",
+  display: "swap",
+});
+
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await getSiteSettings();
+  return {
+    title: settings.title,
+    description: settings.description,
+  };
+}
 
 export default function RootLayout({
   children,
@@ -14,19 +25,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="id" className="h-full antialiased">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin="anonymous"
-        />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200..800&display=swap"
-          rel="stylesheet"
-        />
-      </head>
+    <html
+      lang="id"
+      className={`${bricolageGrotesque.variable} ${bricolageGrotesque.className} h-full antialiased`}
+    >
       <body className="min-h-full flex flex-col bg-white text-zinc-950 font-sans">
         <SmoothScroll>{children}</SmoothScroll>
       </body>

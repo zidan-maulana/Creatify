@@ -24,8 +24,8 @@ export interface DivisionFilterOption {
 
 export const DIVISION_OPTIONS: DivisionFilterOption[] = [
   { id: "ketua-wakil", badge: "Ketua & Wakil" },
-  { id: "visual-creative", badge: "Visual & Creative" },
   { id: "executive-committee", badge: "Executive Committee" },
+  { id: "visual-creative", badge: "Visual & Creative" },
   { id: "talent-content", badge: "Talent & Content" },
   { id: "research-development", badge: "Research Development" },
 ];

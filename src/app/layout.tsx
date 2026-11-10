@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { SmoothScroll } from "@/components/providers/SmoothScroll";
+import { SITE_CONFIG } from "@/config/site";
 
 export const metadata: Metadata = {
-  title: "Creatify — Digital Portfolio & Creative Team",
-  description:
-    "Tim kreatif resmi pendukung branding dan komunikasi visual Fakultas Ilmu Komputer.",
+  title: SITE_CONFIG.title,
+  description: SITE_CONFIG.description,
 };
 
 export default function RootLayout({
@@ -27,7 +27,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="min-h-full flex flex-col bg-white text-zinc-950">
+      <body className="min-h-full flex flex-col bg-white text-zinc-950 font-sans">
         <SmoothScroll>{children}</SmoothScroll>
       </body>
     </html>

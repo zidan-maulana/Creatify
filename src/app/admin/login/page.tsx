@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
   Mail,
@@ -140,15 +141,21 @@ export default function AdminLoginPage() {
                 aria-hidden="true"
                 className="pointer-events-none absolute inset-2.5 rounded-full border border-dotted border-zinc-300/80"
               />
-              <div className="relative flex h-12 w-12 items-center justify-center rounded-[14px] bg-gradient-to-b from-[#2a70f6] to-[#1348b5] shadow-[0_10px_24px_rgba(24,90,219,0.28)]">
-                {viewMode === "forgot" ? (
+              {viewMode === "forgot" ? (
+                <div className="relative flex h-12 w-12 items-center justify-center rounded-[14px] bg-gradient-to-b from-[#2a70f6] to-[#1348b5] shadow-[0_10px_24px_rgba(24,90,219,0.28)]">
                   <KeyRound className="h-5 w-5 text-white" />
-                ) : (
-                  <div className="h-5 w-5 rotate-45 rounded-[3px] bg-white flex items-center justify-center">
-                    <div className="h-2 w-2 rounded-full bg-[#185adb]" />
-                  </div>
-                )}
-              </div>
+                </div>
+              ) : (
+                <Image
+                  src="/images/blue-logo-creatify.svg"
+                  alt="Logo Creatify"
+                  width={34}
+                  height={40}
+                  unoptimized
+                  loading="eager"
+                  className="relative h-10 w-auto object-contain select-none"
+                />
+              )}
             </div>
 
             {viewMode === "login" ? (

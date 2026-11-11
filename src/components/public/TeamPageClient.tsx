@@ -60,17 +60,17 @@ export function TeamPageClient({
       />
 
       {/* Spacer navigasi header */}
-      <div className="h-16 sm:h-20 w-full shrink-0" aria-hidden="true" />
+      <div className="h-14 sm:h-20 w-full shrink-0" aria-hidden="true" />
 
       {/* Header section halaman tim */}
-      <section className="relative z-10 pt-10 sm:pt-14 md:pt-16 pb-8 sm:pb-10 px-6 sm:px-10 lg:px-12 xl:px-14 text-center w-full max-w-[1360px] mx-auto">
+      <section className="relative z-10 pt-8 sm:pt-14 md:pt-16 pb-6 sm:pb-10 px-4 min-[400px]:px-5 sm:px-10 lg:px-12 xl:px-14 text-center w-full max-w-[1360px] mx-auto">
         <div className="max-w-3xl mx-auto">
-          <h1 className="text-[32px] sm:text-[42px] md:text-[50px] lg:text-[54px] font-medium tracking-[-0.03em] text-zinc-950 leading-[1.15]">
+          <h1 className="text-[29px] min-[400px]:text-[33px] sm:text-[42px] md:text-[50px] lg:text-[54px] font-medium tracking-[-0.03em] text-zinc-950 leading-[1.15]">
             <span className="block">{content.titleLine1}</span>
             <span className="block">{content.titleLine2}</span>
           </h1>
 
-          <p className="mt-3.5 sm:mt-4 max-w-xl mx-auto text-[14.5px] sm:text-[16px] font-normal leading-[1.55] text-zinc-600 sm:whitespace-pre-line">
+          <p className="mt-3 sm:mt-4 max-w-xl mx-auto text-[14px] sm:text-[16px] font-normal leading-[1.55] text-zinc-600 sm:whitespace-pre-line">
             {content.subtitle}
           </p>
         </div>
@@ -79,7 +79,7 @@ export function TeamPageClient({
         <div
           role="tablist"
           aria-label="Filter divisi tim Creatify"
-          className="mt-7 sm:mt-8 w-full max-w-5xl mx-auto overflow-x-auto no-scrollbar px-4 py-1"
+          className="mt-6 sm:mt-8 -mx-4 px-4 min-[400px]:-mx-5 min-[400px]:px-5 sm:mx-auto sm:w-full max-w-5xl overflow-x-auto no-scrollbar sm:px-4 py-1"
         >
           <div className="w-fit min-w-max mx-auto flex items-center gap-1.5 sm:gap-2 md:gap-2.5">
             {DIVISION_OPTIONS.map((opt) => {
@@ -106,14 +106,14 @@ export function TeamPageClient({
       </section>
 
       {/* Grid anggota tim */}
-      <section className="relative z-10 flex-1 w-full max-w-[1360px] mx-auto px-6 sm:px-10 lg:px-12 xl:px-14">
+      <section className="relative z-10 flex-1 w-full max-w-[1360px] mx-auto px-4 min-[400px]:px-5 sm:px-10 lg:px-12 xl:px-14">
         {selectedDivision === "ketua-wakil" ? (
           /* Layout eksekutif ketua & wakil */
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
             {filteredMembers.map((member) => (
               <React.Fragment key={member.id}>
                 {/* Foto potret anggota */}
-                <div className="group relative aspect-[3/4] h-[380px] sm:h-[420px] xl:h-[440px] w-full rounded-[24px] sm:rounded-[28px] overflow-hidden bg-zinc-100 shadow-none transition-all duration-300">
+                <div className="group relative aspect-[3/4] sm:aspect-auto sm:h-[420px] xl:h-[440px] w-full rounded-[22px] sm:rounded-[28px] overflow-hidden bg-zinc-100 shadow-none transition-all duration-300">
                   <img
                     src={member.photo}
                     alt={`${member.name} - ${member.role}`}
@@ -124,7 +124,7 @@ export function TeamPageClient({
                 </div>
 
                 {/* Kartu kutipan anggota */}
-                <div className="aspect-[3/4] h-[380px] sm:h-[420px] xl:h-[440px] w-full rounded-[24px] sm:rounded-[28px] bg-white border border-zinc-200/80 p-6 sm:p-7 flex flex-col justify-between shadow-none transition-all duration-300 text-left text-zinc-950">
+                <div className="min-h-[260px] h-auto sm:h-[420px] xl:h-[440px] w-full rounded-[22px] sm:rounded-[28px] bg-white border border-zinc-200/80 p-5 sm:p-7 flex flex-col justify-between gap-5 sm:gap-0 shadow-none transition-all duration-300 text-left text-zinc-950">
                   <div>
                     <div className="text-[32px] sm:text-[36px] font-serif text-zinc-900 leading-none mb-3 select-none">
                       ”
@@ -197,7 +197,7 @@ function StandardMemberCard({
   fallbackInstagramUrl: string;
 }) {
   return (
-    <div className="group relative aspect-[4/4.6] w-full rounded-[22px] sm:rounded-[26px] overflow-hidden bg-zinc-100 shadow-none transition-all duration-300">
+    <div className="group relative aspect-[4/4.6] w-full rounded-[20px] sm:rounded-[26px] overflow-hidden bg-zinc-100 shadow-none transition-all duration-300">
       <img
         src={member.photo}
         alt={`${member.name} - ${member.role}`}

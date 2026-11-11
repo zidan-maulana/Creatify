@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { AnimatedArrowBadge } from "@/components/ui/AnimatedArrowBadge";
+import { ScrollReveal } from "@/components/ui/ScrollReveal";
 import {
   DEFAULT_LANDING_CONTENT,
   DEFAULT_SITE_SETTINGS,
@@ -18,7 +19,6 @@ export function FaqSection({
   siteSettings = DEFAULT_SITE_SETTINGS,
 }: FaqSectionProps) {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
-  const [isVisible, setIsVisible] = useState(false);
   const gridRef = useRef<HTMLDivElement>(null);
   const stickyRef = useRef<HTMLDivElement>(null);
   const emailHref = `mailto:${siteSettings.email}`;
@@ -26,25 +26,6 @@ export function FaqSection({
   const toggleItem = (index: number) => {
     setOpenIndex((prev) => (prev === index ? null : index));
   };
-
-  // Animasi entrance saat section memasuki viewport
-  useEffect(() => {
-    const node = gridRef.current;
-    if (!node) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          observer.disconnect();
-        }
-      },
-      { threshold: 0.1 }
-    );
-
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, []);
 
   // Animasi scroll-follow halus mengikuti posisi scroll sampai batas bawah section
   useEffect(() => {
@@ -133,44 +114,38 @@ export function FaqSection({
   return (
     <section
       id="faq"
-      className="scroll-mt-24 sm:scroll-mt-28 relative w-full bg-transparent text-zinc-950 pt-10 sm:pt-14 md:pt-16 pb-20 sm:pb-24 md:pb-28 px-6 sm:px-10 lg:px-12 xl:px-14 overflow-x-clip"
+      className="scroll-mt-24 sm:scroll-mt-28 relative w-full bg-transparent text-zinc-950 pt-8 sm:pt-14 md:pt-16 pb-14 sm:pb-24 md:pb-28 px-4 min-[400px]:px-5 sm:px-10 lg:px-12 xl:px-14 overflow-x-clip"
     >
       <div className="mx-auto max-w-[1360px]">
         <div
           ref={gridRef}
-          className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-6 xl:gap-10 items-start"
+          className="grid grid-cols-1 lg:grid-cols-12 gap-7 lg:gap-6 xl:gap-10 items-start"
         >
           {/* Kolom kiri: Judul section, pengantar & CTA email */}
           <div
             ref={stickyRef}
             className="lg:col-span-4 xl:col-span-4 will-change-transform"
           >
-            <div
-              className={`transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-                isVisible
-                  ? "opacity-100 translate-y-0"
-                  : "opacity-0 translate-y-6"
-              }`}
-            >
-              <h2 className="text-[42px] sm:text-[50px] lg:text-[52px] xl:text-[64px] font-medium tracking-[-0.03em] text-[#0c0f1d] leading-[1.06]">
+            <ScrollReveal duration={580} distance={24}>
+              <h2 className="text-[34px] min-[400px]:text-[38px] sm:text-[50px] lg:text-[52px] xl:text-[64px] font-medium tracking-[-0.03em] text-[#0c0f1d] leading-[1.08] sm:leading-[1.06]">
                 <span className="block">{content.titleLine1}</span>
                 <span className="block">{content.titleLine2}</span>
               </h2>
 
-              <p className="mt-5 sm:mt-6 max-w-[360px] text-[15.5px] sm:text-[16.5px] xl:text-[17px] font-normal leading-[1.6] text-zinc-500">
+              <p className="mt-4 sm:mt-6 max-w-[360px] text-[14.5px] sm:text-[16.5px] xl:text-[17px] font-normal leading-[1.6] text-zinc-500">
                 {content.subtitle}
               </p>
 
-              <div className="mt-7 sm:mt-8">
+              <div className="mt-6 sm:mt-8">
                 <a
                   href={emailHref}
-                  className="group inline-flex items-center justify-between gap-3.5 rounded-full border border-zinc-200/90 bg-white pl-6 pr-2 py-2 text-[14.5px] sm:text-[15px] font-medium text-[#0c0f1d] hover:border-zinc-300 hover:bg-zinc-50 transition-colors duration-200 cursor-pointer select-none"
+                  className="group inline-flex items-center justify-between gap-3.5 rounded-full border border-zinc-200/90 bg-white pl-5 sm:pl-6 pr-1.5 sm:pr-2 py-1.5 sm:py-2 text-[14px] sm:text-[15px] font-medium text-[#0c0f1d] hover:border-zinc-300 hover:bg-zinc-50 transition-colors duration-200 cursor-pointer select-none"
                 >
                   <span>{content.ctaLabel}</span>
                   <AnimatedArrowBadge variant="blue" />
                 </a>
               </div>
-            </div>
+            </ScrollReveal>
           </div>
 
           {/* Kolom kanan: Daftar accordion pertanyaan FAQ */}
@@ -181,18 +156,23 @@ export function FaqSection({
               const panelId = `faq-panel-${item.id}`;
 
               return (
-                <div key={item.id}>
+                <ScrollReveal
+                  key={item.id}
+                  delay={Math.min(index * 55, 220)}
+                  duration={540}
+                  distance={18}
+                >
                   <button
                     id={buttonId}
                     type="button"
                     aria-expanded={isOpen}
                     aria-controls={panelId}
                     onClick={() => toggleItem(index)}
-                    className={`group w-full flex items-center justify-between gap-6 text-left cursor-pointer select-none transition-[padding] duration-300 ${
-                      isOpen ? "pt-6 sm:pt-7 pb-3 sm:pb-3.5" : "py-6 sm:py-7"
+                    className={`group w-full flex items-center justify-between gap-4 sm:gap-6 text-left cursor-pointer select-none transition-[padding] duration-300 ${
+                      isOpen ? "pt-5 sm:pt-7 pb-2.5 sm:pb-3.5" : "py-5 sm:py-7"
                     }`}
                   >
-                    <span className="text-[17.5px] sm:text-[19.5px] lg:text-[21px] font-medium tracking-[-0.015em] leading-[1.4] text-[#0c0f1d]">
+                    <span className="text-[16px] sm:text-[19.5px] lg:text-[21px] font-medium tracking-[-0.015em] leading-[1.4] text-[#0c0f1d]">
                       {item.question}
                     </span>
 
@@ -204,7 +184,7 @@ export function FaqSection({
                       stroke="currentColor"
                       strokeWidth="1.8"
                       strokeLinecap="round"
-                      className={`h-[20px] w-[20px] shrink-0 transition-colors duration-200 ${
+                      className={`h-[18px] w-[18px] sm:h-[20px] sm:w-[20px] shrink-0 transition-colors duration-200 ${
                         isOpen
                           ? "text-[#185adb]"
                           : "text-[#0c0f1d]/80 group-hover:text-[#185adb]"
@@ -237,12 +217,12 @@ export function FaqSection({
                     }`}
                   >
                     <div className="overflow-hidden">
-                      <p className="pb-6 sm:pb-7 pr-6 sm:pr-8 text-[15px] sm:text-[15.5px] lg:text-[16px] xl:text-[16.5px] font-normal leading-[1.65] text-zinc-500">
+                      <p className="pb-5 sm:pb-7 pr-2 sm:pr-8 text-[14px] sm:text-[15.5px] lg:text-[16px] xl:text-[16.5px] font-normal leading-[1.65] text-zinc-500">
                         {item.answer}
                       </p>
                     </div>
                   </div>
-                </div>
+                </ScrollReveal>
               );
             })}
           </div>

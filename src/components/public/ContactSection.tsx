@@ -1,10 +1,12 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useId } from "react";
+import { useState, useRef, useId, type FormEvent } from "react";
 import Link from "next/link";
 import { ChevronDown, Check, LockKeyhole } from "lucide-react";
 import { AnimatedArrowBadge } from "@/components/ui/AnimatedArrowBadge";
 import { BrandLogo } from "@/components/ui/BrandLogo";
+import { ScrollReveal } from "@/components/ui/ScrollReveal";
+import { useDismissableLayers } from "@/hooks/useDismissableLayer";
 import {
   DEFAULT_LANDING_CONTENT,
   DEFAULT_SITE_SETTINGS,
@@ -53,39 +55,24 @@ export function ContactSection({
     { label: "YouTube", href: siteSettings.youtubeUrl },
   ];
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent | TouchEvent) => {
-      const target = event.target as Node;
-      if (dropdownRef.current && !dropdownRef.current.contains(target)) {
-        setIsDropdownOpen(false);
-      }
-      if (lockedCardRef.current && !lockedCardRef.current.contains(target)) {
-        setIsClosedNoticeVisible(false);
-      }
-    };
-
-    const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setIsDropdownOpen(false);
-        setIsClosedNoticeVisible(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-    document.addEventListener("touchstart", handleClickOutside, { passive: true });
-    document.addEventListener("keydown", handleEscape);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-      document.removeEventListener("touchstart", handleClickOutside);
-      document.removeEventListener("keydown", handleEscape);
-    };
-  }, []);
+  useDismissableLayers([
+    {
+      ref: dropdownRef,
+      enabled: effectiveDropdownOpen,
+      onDismiss: () => setIsDropdownOpen(false),
+    },
+    {
+      ref: lockedCardRef,
+      enabled: showClosedModal,
+      onDismiss: () => setIsClosedNoticeVisible(false),
+    },
+  ]);
 
   const activeDivision = content.divisionOptions.find(
     (opt) => opt.id === selectedDivision
   );
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!content.isRecruitmentOpen) return;
 
@@ -129,7 +116,7 @@ export function ContactSection({
   return (
     <footer
       id="kontak"
-      className="scroll-mt-0 relative w-full bg-[#185adb] text-white pt-24 sm:pt-28 pb-10 sm:pb-12 px-6 sm:px-10 lg:px-12 xl:px-14 overflow-hidden"
+      className="scroll-mt-0 relative w-full bg-[#185adb] text-white pt-16 sm:pt-28 pb-8 sm:pb-12 px-4 min-[400px]:px-5 sm:px-10 lg:px-12 xl:px-14 overflow-hidden"
     >
       {/* Anchor target untuk navigasi rekrutmen & kontak */}
       <div
@@ -137,59 +124,64 @@ export function ContactSection({
         className="scroll-mt-24 sm:scroll-mt-28 mx-auto max-w-[1360px]"
       >
         {/* Bagian atas: Info kontak & form pendaftaran rekrutmen */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 xl:gap-12 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-9 sm:gap-12 lg:gap-8 xl:gap-12 items-start">
           {/* Kolom kiri: Judul section, pengantar & kanal kontak resmi */}
-          <div className="lg:col-span-6 xl:col-span-6 pt-1">
-            <h2 className="text-[38px] sm:text-[50px] lg:text-[56px] xl:text-[64px] font-medium tracking-[-0.03em] leading-[1.06] text-white">
+          <ScrollReveal duration={500} distance={24} className="lg:col-span-6 xl:col-span-6 pt-1">
+            <h2 className="text-[34px] min-[400px]:text-[38px] sm:text-[50px] lg:text-[56px] xl:text-[64px] font-medium tracking-[-0.03em] leading-[1.08] sm:leading-[1.06] text-white">
               <span className="block">{content.titleLine1}</span>
               <span className="block sm:whitespace-nowrap">{content.titleLine2}</span>
             </h2>
 
-            <p className="mt-5 sm:mt-6 max-w-[440px] text-[15.5px] sm:text-[16.5px] lg:text-[17.5px] font-normal leading-[1.6] text-white/80">
+            <p className="mt-4 sm:mt-6 max-w-[440px] text-[14.5px] sm:text-[16.5px] lg:text-[17.5px] font-normal leading-[1.6] text-white/80">
               {content.subtitle}
             </p>
 
             {/* Detail kanal resmi Creatify */}
-            <div className="mt-9 sm:mt-10 space-y-5 sm:space-y-6">
+            <div className="mt-7 sm:mt-10 space-y-4 sm:space-y-6">
               <div>
-                <span className="block text-[13px] sm:text-[14px] font-normal text-white/65">
+                <span className="block text-[12.5px] sm:text-[14px] font-normal text-white/65">
                   Email
                 </span>
                 <a
                   href={emailHref}
-                  className="mt-1 inline-block text-[22px] sm:text-[25px] lg:text-[26px] font-medium tracking-[-0.02em] text-white hover:text-white/85 transition-colors"
+                  className="mt-0.5 sm:mt-1 inline-block max-w-full break-all sm:break-normal text-[17.5px] min-[400px]:text-[20px] sm:text-[25px] lg:text-[26px] font-medium tracking-[-0.02em] text-white hover:text-white/85 transition-colors"
                 >
                   {siteSettings.email}
                 </a>
               </div>
 
               <div>
-                <span className="block text-[13px] sm:text-[14px] font-normal text-white/65">
+                <span className="block text-[12.5px] sm:text-[14px] font-normal text-white/65">
                   Instagram
                 </span>
                 <a
                   href={siteSettings.instagramUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="mt-1 inline-block text-[22px] sm:text-[25px] lg:text-[26px] font-medium tracking-[-0.02em] text-white hover:text-white/85 transition-colors"
+                  className="mt-0.5 sm:mt-1 inline-block max-w-full break-words text-[17.5px] min-[400px]:text-[20px] sm:text-[25px] lg:text-[26px] font-medium tracking-[-0.02em] text-white hover:text-white/85 transition-colors"
                 >
                   {siteSettings.instagramHandle}
                 </a>
               </div>
 
               <div>
-                <span className="block text-[13px] sm:text-[14px] font-normal text-white/65">
+                <span className="block text-[12.5px] sm:text-[14px] font-normal text-white/65">
                   Sekretariat
                 </span>
-                <p className="mt-1 text-[22px] sm:text-[25px] lg:text-[26px] font-medium tracking-[-0.02em] text-white">
+                <p className="mt-0.5 sm:mt-1 text-[17.5px] min-[400px]:text-[20px] sm:text-[25px] lg:text-[26px] font-medium tracking-[-0.02em] text-white">
                   {siteSettings.secretariat.shortLabel}
                 </p>
               </div>
             </div>
-          </div>
+          </ScrollReveal>
 
           {/* Kolom kanan: Card formulir rekrutmen anggota */}
-          <div className="lg:col-span-6 lg:col-start-7 xl:col-span-6 xl:col-start-7 xl:max-w-[620px] xl:ml-auto w-full">
+          <ScrollReveal
+            delay={75}
+            duration={480}
+            distance={24}
+            className="lg:col-span-6 lg:col-start-7 xl:col-span-6 xl:col-start-7 xl:max-w-[620px] xl:ml-auto w-full"
+          >
             <div
               ref={lockedCardRef}
               tabIndex={isLocked ? 0 : undefined}
@@ -218,18 +210,18 @@ export function ContactSection({
                   setIsClosedNoticeVisible(false);
                 }
               }}
-              className={`relative w-full rounded-[24px] sm:rounded-[28px] bg-white text-[#0c0f1d] p-6 sm:p-8 ${
+              className={`relative w-full rounded-[22px] sm:rounded-[28px] bg-white text-[#0c0f1d] p-5 sm:p-8 ${
                 isLocked
                   ? "overflow-hidden cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
                   : ""
               }`}
             >
               {!isLocked && submittedData ? (
-                <div className="py-6 sm:py-8 flex flex-col items-start text-left">
+                <div className="py-4 sm:py-8 flex flex-col items-start text-left">
                   <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[#185adb]/10 text-[#185adb]">
                     <Check className="h-5 w-5 stroke-[2.5]" />
                   </div>
-                  <h3 className="mt-5 text-[20px] sm:text-[22px] font-semibold tracking-[-0.02em] text-[#0c0f1d]">
+                  <h3 className="mt-5 text-[19px] sm:text-[22px] font-semibold tracking-[-0.02em] text-[#0c0f1d]">
                     Pendaftaran siap dikirim, {submittedData.name}
                   </h3>
                   <p className="mt-2.5 text-[14px] leading-[1.6] text-zinc-500">
@@ -241,10 +233,10 @@ export function ContactSection({
                     Anda atau isi ulang formulir.
                   </p>
 
-                  <div className="mt-7 flex flex-wrap items-center gap-3 w-full">
+                  <div className="mt-6 sm:mt-7 flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2.5 sm:gap-3 w-full">
                     <a
                       href={submittedData.mailtoHref}
-                      className="inline-flex flex-1 sm:flex-initial items-center justify-center rounded-full bg-[#185adb] hover:bg-[#1348b5] text-white py-2.5 px-6 text-[13.5px] sm:text-[14px] font-medium transition-colors"
+                      className="inline-flex items-center justify-center rounded-full bg-[#185adb] hover:bg-[#1348b5] text-white py-2.5 px-6 text-[13.5px] sm:text-[14px] font-medium transition-colors"
                     >
                       Buka Aplikasi Email
                     </a>
@@ -382,7 +374,7 @@ export function ContactSection({
                         <div
                           role="listbox"
                           aria-labelledby="division-label"
-                          className="absolute left-0 right-0 top-full z-20 mt-1.5 rounded-[12px] border border-zinc-200 bg-white p-1.5 shadow-[0_10px_28px_rgba(12,15,29,0.08)]"
+                          className="absolute left-0 right-0 top-full z-20 mt-1.5 max-h-[240px] overflow-y-auto rounded-[12px] border border-zinc-200 bg-white p-1.5 shadow-[0_10px_28px_rgba(12,15,29,0.08)]"
                         >
                           {content.divisionOptions.map((option) => {
                             const isSelected = selectedDivision === option.id;
@@ -464,7 +456,7 @@ export function ContactSection({
                   aria-modal="false"
                   aria-hidden={!showClosedModal}
                   aria-labelledby="recruitment-closed-title"
-                  className={`absolute inset-0 z-20 flex items-center justify-center rounded-[24px] sm:rounded-[28px] bg-white/80 backdrop-blur-[6px] p-7 sm:p-10 transition-opacity duration-200 ease-out ${
+                  className={`absolute inset-0 z-20 flex items-center justify-center rounded-[22px] sm:rounded-[28px] bg-white/80 backdrop-blur-[6px] p-6 sm:p-10 transition-opacity duration-200 ease-out ${
                     showClosedModal
                       ? "opacity-100 pointer-events-auto"
                       : "opacity-0 pointer-events-none"
@@ -481,7 +473,7 @@ export function ContactSection({
                       viewBox="0 0 48 48"
                       fill="none"
                       aria-hidden="true"
-                      className="h-14 w-14 sm:h-16 sm:w-16 drop-shadow-[0_12px_24px_rgba(24,90,219,0.24)]"
+                      className="h-12 w-12 sm:h-16 sm:w-16 drop-shadow-[0_12px_24px_rgba(24,90,219,0.24)]"
                     >
                       <defs>
                         <linearGradient
@@ -523,12 +515,12 @@ export function ContactSection({
 
                     <h3
                       id="recruitment-closed-title"
-                      className="mt-5 text-[24px] sm:text-[28px] lg:text-[30px] font-semibold tracking-[-0.025em] leading-[1.15] text-[#0c0f1d]"
+                      className="mt-4 sm:mt-5 text-[21px] sm:text-[28px] lg:text-[30px] font-semibold tracking-[-0.025em] leading-[1.15] text-[#0c0f1d]"
                     >
                       Open Recruitment Ditutup
                     </h3>
 
-                    <p className="mt-3 text-[15px] sm:text-[16.5px] leading-[1.6] text-zinc-600">
+                    <p className="mt-2.5 sm:mt-3 text-[14px] sm:text-[16.5px] leading-[1.6] text-zinc-600">
                       {content.closedNotice}
                     </p>
 
@@ -536,7 +528,7 @@ export function ContactSection({
                       href={emailHref}
                       tabIndex={showClosedModal ? undefined : -1}
                       onClick={(e) => e.stopPropagation()}
-                      className="group mt-7 inline-flex items-center justify-between gap-3.5 rounded-full bg-[#185adb] hover:bg-[#1348b5] pl-6 pr-2 py-2 text-[14.5px] sm:text-[15px] font-medium text-white transition-colors duration-200 cursor-pointer select-none"
+                      className="group mt-6 sm:mt-7 inline-flex items-center justify-between gap-3.5 rounded-full bg-[#185adb] hover:bg-[#1348b5] pl-5 sm:pl-6 pr-1.5 sm:pr-2 py-1.5 sm:py-2 text-[14px] sm:text-[15px] font-medium text-white transition-colors duration-200 cursor-pointer select-none"
                     >
                       <span>Hubungi via Email</span>
                       <AnimatedArrowBadge variant="white" />
@@ -545,31 +537,35 @@ export function ContactSection({
                 </div>
               )}
             </div>
-          </div>
+          </ScrollReveal>
         </div>
 
         {/* Garis pemisah footer */}
         <div
           id="footer"
-          className="scroll-mt-24 sm:scroll-mt-28 mt-16 sm:mt-20 pt-12 sm:pt-14 border-t border-white/15"
+          className="scroll-mt-24 sm:scroll-mt-28 mt-14 sm:mt-20 pt-10 sm:pt-14 border-t border-white/15"
         >
           {/* Kolom navigasi & informasi footer */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-8">
+          <ScrollReveal
+            duration={440}
+            distance={18}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-8 sm:gap-10 lg:gap-8"
+          >
             {/* Kolom 1: Brand Creatify */}
             <div className="sm:col-span-2 lg:col-span-5">
               <BrandLogo variant="white" label={siteSettings.name} />
 
-              <p className="mt-4 max-w-[265px] text-[13.5px] font-normal leading-[1.6] text-white/75">
+              <p className="mt-3.5 sm:mt-4 max-w-[300px] sm:max-w-[265px] text-[14px] sm:text-[13.5px] font-normal leading-[1.6] text-white/80 sm:text-white/75">
                 {content.footerDescription}
               </p>
             </div>
 
             {/* Kolom 2: Navigasi halaman */}
             <div className="lg:col-span-2">
-              <h3 className="text-[12px] font-normal text-white/60 mb-3.5">
+              <h3 className="text-[12.5px] sm:text-[12px] font-normal text-white/65 sm:text-white/60 mb-3 sm:mb-3.5">
                 Halaman
               </h3>
-              <ul className="space-y-2 text-[13.5px] sm:text-[14px] font-medium text-white">
+              <ul className="space-y-2.5 sm:space-y-2 text-[16px] sm:text-[14px] font-medium text-white">
                 <li>
                   <button
                     type="button"
@@ -620,10 +616,10 @@ export function ContactSection({
 
             {/* Kolom 3: Media sosial */}
             <div className="lg:col-span-2">
-              <h3 className="text-[12px] font-normal text-white/60 mb-3.5">
+              <h3 className="text-[12.5px] sm:text-[12px] font-normal text-white/65 sm:text-white/60 mb-3 sm:mb-3.5">
                 Media Sosial
               </h3>
-              <ul className="space-y-2 text-[13.5px] sm:text-[14px] font-medium text-white">
+              <ul className="space-y-2.5 sm:space-y-2 text-[16px] sm:text-[14px] font-medium text-white">
                 {footerSocialLinks.map((social) => (
                   <li key={social.label}>
                     <a
@@ -641,25 +637,30 @@ export function ContactSection({
 
             {/* Kolom 4: Sekretariat */}
             <div className="lg:col-span-3">
-              <h3 className="text-[12px] font-normal text-white/60 mb-3.5">
+              <h3 className="text-[12.5px] sm:text-[12px] font-normal text-white/65 sm:text-white/60 mb-3 sm:mb-3.5">
                 Sekretariat
               </h3>
-              <p className="text-[13.5px] sm:text-[14px] font-medium leading-[1.6] text-white">
+              <p className="text-[15.5px] sm:text-[14px] font-medium leading-[1.6] text-white">
                 {siteSettings.secretariat.faculty}
                 <br />
                 {siteSettings.secretariat.address}
               </p>
               <a
                 href={emailHref}
-                className="mt-3 inline-block text-[13.5px] sm:text-[14px] font-medium text-white hover:text-white/75 transition-colors"
+                className="mt-3 inline-block max-w-full break-words text-[15.5px] sm:text-[14px] font-medium text-white hover:text-white/75 transition-colors"
               >
                 {siteSettings.email}
               </a>
             </div>
-          </div>
+          </ScrollReveal>
 
           {/* Baris hak cipta & tombol kembali ke atas */}
-          <div className="mt-14 sm:mt-16 pt-4 flex flex-col sm:flex-row items-center justify-between gap-4 text-[12px] text-white/70">
+          <ScrollReveal
+            delay={60}
+            duration={400}
+            distance={14}
+            className="mt-10 sm:mt-16 pt-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3.5 sm:gap-4 text-[12px] text-white/70 text-left"
+          >
             <p>{content.copyrightText}</p>
 
             <p>{content.facultyLabel}</p>
@@ -667,12 +668,12 @@ export function ContactSection({
             <button
               type="button"
               onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-              className="group inline-flex items-center justify-between gap-3 rounded-full bg-white pl-5 pr-2 py-2 text-[13.5px] sm:text-[14px] font-medium text-zinc-950 hover:bg-zinc-100 transition-colors duration-200 cursor-pointer select-none"
+              className="group inline-flex items-center justify-between gap-3 rounded-full bg-white pl-5 pr-1.5 sm:pr-2 py-1.5 sm:py-2 text-[13.5px] sm:text-[14px] font-medium text-zinc-950 hover:bg-zinc-100 transition-colors duration-200 cursor-pointer select-none"
             >
               <span>Kembali ke atas</span>
               <AnimatedArrowBadge direction="up" variant="blue" />
             </button>
-          </div>
+          </ScrollReveal>
         </div>
       </div>
     </footer>

@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import { ScrollReveal } from "@/components/ui/ScrollReveal";
 import { DEFAULT_LANDING_CONTENT } from "@/config/landing-cms";
 import type { MarqueeContent } from "@/types/cms";
 
@@ -169,16 +169,21 @@ export function LogoMarquee({
   content = DEFAULT_LANDING_CONTENT.marquee,
 }: LogoMarqueeProps) {
   return (
-    <section className="relative w-full overflow-hidden bg-transparent pt-5 sm:pt-7 pb-6 sm:pb-8">
+    <section className="relative w-full overflow-hidden bg-transparent pt-4 sm:pt-7 pb-6 sm:pb-8">
       {/* Label kemitraan fakultas */}
-      <div className="text-center px-4 mb-6 sm:mb-8">
-        <p className="text-[13px] sm:text-[14.5px] font-medium tracking-tight stage-marquee-label stage-sync">
+      <ScrollReveal duration={980} distance={22} className="text-center px-3 sm:px-4 mb-5 sm:mb-8">
+        <p className="text-[10px] min-[390px]:text-[11px] sm:text-[14.5px] font-medium tracking-tight whitespace-nowrap truncate stage-marquee-label stage-sync">
           {content.trustLabel}
         </p>
-      </div>
+      </ScrollReveal>
 
       {/* Marquee track animasi logo mitra */}
-      <div className="mx-auto max-w-[1360px] px-6 sm:px-10 lg:px-12 xl:px-14">
+      <ScrollReveal
+        delay={120}
+        duration={940}
+        distance={24}
+        className="mx-auto max-w-[1360px] px-4 min-[400px]:px-5 sm:px-10 lg:px-12 xl:px-14"
+      >
         <div
           className="relative w-full overflow-hidden flex items-center py-2"
           style={{
@@ -194,12 +199,12 @@ export function LogoMarquee({
               <div
                 key={trackIndex}
                 aria-hidden={trackIndex === 1 || undefined}
-                className="flex items-center gap-16 sm:gap-20 md:gap-24 pr-16 sm:pr-20 md:pr-24 shrink-0"
+                className="flex items-center gap-10 sm:gap-20 md:gap-24 pr-10 sm:pr-20 md:pr-24 shrink-0"
               >
                 {PARTNER_LOGOS.map((logo) => (
                   <div
                     key={`${trackIndex}-${logo.name}`}
-                    className="shrink-0 transition-opacity duration-200 opacity-85 hover:opacity-100"
+                    className="shrink-0 scale-[0.82] sm:scale-100 origin-center transition-opacity duration-200 opacity-85 hover:opacity-100"
                   >
                     {logo.node}
                   </div>
@@ -208,7 +213,7 @@ export function LogoMarquee({
             ))}
           </div>
         </div>
-      </div>
+      </ScrollReveal>
 
       <style jsx>{`
         @keyframes marqueeScroll {
@@ -225,8 +230,15 @@ export function LogoMarquee({
           animation: marqueeScroll 30s linear infinite;
           will-change: transform;
         }
-        .marquee-track:hover {
-          animation-play-state: paused;
+        @media (hover: hover) {
+          .marquee-track:hover {
+            animation-play-state: paused;
+          }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .marquee-track {
+            animation: none;
+          }
         }
       `}</style>
     </section>

@@ -372,13 +372,12 @@ export function HeroSection({
                 e.preventDefault();
                 handleNavigateSection("rekrutmen");
               }}
-              className="group inline-flex flex-auto md:flex-initial items-center justify-between gap-1.5 min-[410px]:gap-2 md:gap-3.5 rounded-full bg-white pl-4.5 pr-1.5 py-2 text-[11.5px] min-[390px]:pl-5.5 min-[390px]:pr-1.5 min-[390px]:py-2.5 min-[390px]:text-[12px] md:pl-6 md:pr-2 md:py-2 md:text-[15px] font-medium text-zinc-950 md:shadow-[0_12px_30px_rgba(6,25,80,0.18)] hover:bg-zinc-100 transition-colors duration-200 cursor-pointer select-none whitespace-nowrap"
+              className="group inline-flex flex-auto md:flex-initial items-center justify-between gap-1.5 min-[410px]:gap-2 md:gap-3.5 rounded-full bg-white pl-4.5 pr-1.5 py-2 text-[11.5px] min-[390px]:pl-5.5 min-[390px]:pr-1.5 min-[390px]:py-2.5 min-[390px]:text-[12px] md:pl-6 md:pr-2 md:py-2 md:text-[15px] font-medium text-zinc-950 hover:bg-zinc-100 transition-colors duration-200 cursor-pointer select-none whitespace-nowrap"
             >
               <span>{content.primaryCtaLabel}</span>
               <AnimatedArrowBadge
                 variant="blue"
-                shadowed
-                className="h-[30px] w-[30px] min-[410px]:h-8 min-[410px]:w-8 max-md:shadow-none"
+                className="h-[30px] w-[30px] min-[410px]:h-8 min-[410px]:w-8"
               />
             </a>
 
@@ -388,13 +387,12 @@ export function HeroSection({
                 e.preventDefault();
                 handleNavigateSection("tentang");
               }}
-              className="group inline-flex flex-auto md:flex-initial items-center justify-between gap-1.5 min-[410px]:gap-2 md:gap-3.5 rounded-full bg-[#255fdc]/55 hover:bg-[#255fdc]/75 backdrop-blur-md border border-white/25 md:border-white/20 pl-4.5 pr-1.5 py-2 text-[11.5px] min-[390px]:pl-5.5 min-[390px]:pr-1.5 min-[390px]:py-2.5 min-[390px]:text-[12px] md:pl-6 md:pr-2 md:py-2 md:text-[15px] font-medium text-white md:shadow-sm transition-colors duration-200 cursor-pointer select-none whitespace-nowrap"
+              className="group inline-flex flex-auto md:flex-initial items-center justify-between gap-1.5 min-[410px]:gap-2 md:gap-3.5 rounded-full bg-[#255fdc]/55 hover:bg-[#255fdc]/75 backdrop-blur-md border border-white/25 md:border-white/20 pl-4.5 pr-1.5 py-2 text-[11.5px] min-[390px]:pl-5.5 min-[390px]:pr-1.5 min-[390px]:py-2.5 min-[390px]:text-[12px] md:pl-6 md:pr-2 md:py-2 md:text-[15px] font-medium text-white transition-colors duration-200 cursor-pointer select-none whitespace-nowrap"
             >
               <span>{content.secondaryCtaLabel}</span>
               <AnimatedArrowBadge
                 variant="white"
-                shadowed
-                className="h-[30px] w-[30px] min-[410px]:h-8 min-[410px]:w-8 max-md:shadow-none"
+                className="h-[30px] w-[30px] min-[410px]:h-8 min-[410px]:w-8"
               />
             </a>
           </div>

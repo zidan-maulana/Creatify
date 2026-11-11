@@ -1,9 +1,11 @@
 "use client";
 
-import React, { useState, useMemo, useEffect } from "react";
+import { Fragment, useState, useMemo, useEffect, useRef } from "react";
+import { ChevronDown, Check } from "lucide-react";
 import { DIVISION_OPTIONS, DivisionId, TeamMember } from "@/data/team";
 import { PublicNavbar } from "@/components/public/PublicNavbar";
 import { InstagramIcon } from "@/components/ui/InstagramIcon";
+import { useDismissableLayers } from "@/hooks/useDismissableLayer";
 import {
   DEFAULT_SITE_SETTINGS,
   DEFAULT_TEAM_PAGE_CONTENT,
@@ -21,7 +23,17 @@ export function TeamPageClient({
 }: TeamPageClientProps) {
   const [selectedDivision, setSelectedDivision] =
     useState<DivisionId>("ketua-wakil");
+  const [isDivisionDropdownOpen, setIsDivisionDropdownOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const divisionDropdownRef = useRef<HTMLDivElement>(null);
+
+  useDismissableLayers([
+    {
+      ref: divisionDropdownRef,
+      enabled: isDivisionDropdownOpen,
+      onDismiss: () => setIsDivisionDropdownOpen(false),
+    },
+  ]);
 
   useEffect(() => {
     let lastScrolled: boolean | null = null;
@@ -36,6 +48,10 @@ export function TeamPageClient({
     handleScroll();
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  const activeDivisionOption =
+    DIVISION_OPTIONS.find((opt) => opt.id === selectedDivision) ??
+    DIVISION_OPTIONS[0];
 
   // Filter anggota sesuai tab divisi terpilih
   const filteredMembers = useMemo(() => {
@@ -60,10 +76,10 @@ export function TeamPageClient({
       />
 
       {/* Spacer navigasi header */}
-      <div className="h-14 sm:h-20 w-full shrink-0" aria-hidden="true" />
+      <div className="h-[76px] md:h-20 w-full shrink-0" aria-hidden="true" />
 
       {/* Header section halaman tim */}
-      <section className="relative z-10 pt-8 sm:pt-14 md:pt-16 pb-6 sm:pb-10 px-4 min-[400px]:px-5 sm:px-10 lg:px-12 xl:px-14 text-center w-full max-w-[1360px] mx-auto">
+      <section className="relative z-20 pt-8 min-[390px]:pt-9 sm:pt-12 md:pt-16 pb-6 sm:pb-10 px-4 min-[400px]:px-5 sm:px-10 lg:px-12 xl:px-14 text-center w-full max-w-[1360px] mx-auto">
         <div className="max-w-3xl mx-auto">
           <h1 className="text-[29px] min-[400px]:text-[33px] sm:text-[42px] md:text-[50px] lg:text-[54px] font-medium tracking-[-0.03em] text-zinc-950 leading-[1.15]">
             <span className="block">{content.titleLine1}</span>
@@ -75,13 +91,75 @@ export function TeamPageClient({
           </p>
         </div>
 
-        {/* Badge filter divisi tim */}
+        {/* Dropdown filter divisi tim khusus mobile */}
+        <div
+          ref={divisionDropdownRef}
+          className="md:hidden relative mt-6 w-full max-w-[460px] mx-auto text-left"
+        >
+          <button
+            type="button"
+            aria-haspopup="listbox"
+            aria-expanded={isDivisionDropdownOpen}
+            aria-label="Filter divisi tim Creatify"
+            onClick={() => setIsDivisionDropdownOpen((prev) => !prev)}
+            className="w-full flex items-center justify-between gap-3 rounded-full border border-zinc-200/90 bg-white pl-5 pr-2 py-2 text-left text-[14.5px] font-medium text-zinc-950 shadow-[0_2px_10px_rgba(12,15,29,0.04)] hover:border-zinc-300 hover:bg-zinc-50/70 transition-colors cursor-pointer select-none"
+          >
+            <span className="truncate">{activeDivisionOption.badge}</span>
+            <span className="flex h-8.5 w-8.5 items-center justify-center rounded-full bg-[#185adb] text-white shrink-0">
+              <ChevronDown
+                className={`h-4 w-4 stroke-[2.2] transition-transform duration-200 ${
+                  isDivisionDropdownOpen ? "rotate-180" : ""
+                }`}
+              />
+            </span>
+          </button>
+
+          <div
+            role="listbox"
+            aria-hidden={!isDivisionDropdownOpen}
+            aria-label="Pilih divisi tim Creatify"
+            className={`absolute left-0 right-0 top-full z-30 mt-2 origin-top rounded-2xl border border-zinc-200/85 bg-white p-1.5 text-zinc-950 shadow-[0_14px_34px_rgba(12,15,29,0.12)] transition-all duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+              isDivisionDropdownOpen
+                ? "opacity-100 scale-100 translate-y-0 pointer-events-auto"
+                : "opacity-0 scale-[0.98] -translate-y-1.5 pointer-events-none"
+            }`}
+          >
+            {DIVISION_OPTIONS.map((opt) => {
+              const isSelected = selectedDivision === opt.id;
+              return (
+                <button
+                  key={opt.id}
+                  type="button"
+                  role="option"
+                  tabIndex={isDivisionDropdownOpen ? undefined : -1}
+                  aria-selected={isSelected}
+                  onClick={() => {
+                    setSelectedDivision(opt.id);
+                    setIsDivisionDropdownOpen(false);
+                  }}
+                  className={`w-full flex items-center justify-between gap-3 rounded-xl px-3.5 py-2.5 text-left text-[13.5px] transition-colors cursor-pointer ${
+                    isSelected
+                      ? "bg-[#185adb]/10 font-semibold text-[#185adb]"
+                      : "font-medium text-zinc-800 hover:bg-zinc-50"
+                  }`}
+                >
+                  <span className="truncate">{opt.badge}</span>
+                  {isSelected && (
+                    <Check className="h-4 w-4 text-[#185adb] shrink-0" />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Badge filter divisi tim (desktop) */}
         <div
           role="tablist"
           aria-label="Filter divisi tim Creatify"
-          className="mt-6 sm:mt-8 -mx-4 px-4 min-[400px]:-mx-5 min-[400px]:px-5 sm:mx-auto sm:w-full max-w-5xl overflow-x-auto no-scrollbar sm:px-4 py-1"
+          className="hidden md:block mt-8 w-full max-w-5xl mx-auto overflow-x-auto no-scrollbar px-4 py-1"
         >
-          <div className="w-fit min-w-max mx-auto flex items-center gap-1.5 sm:gap-2 md:gap-2.5">
+          <div className="w-fit min-w-max mx-auto flex items-center gap-2 md:gap-2.5">
             {DIVISION_OPTIONS.map((opt) => {
               const isSelected = selectedDivision === opt.id;
               return (
@@ -91,7 +169,7 @@ export function TeamPageClient({
                   role="tab"
                   aria-selected={isSelected}
                   onClick={() => setSelectedDivision(opt.id)}
-                  className={`group inline-flex items-center px-3.5 sm:px-4 md:px-4.5 py-1.5 sm:py-2 rounded-full text-[12.5px] sm:text-[13px] md:text-[13.5px] font-medium transition-all duration-200 cursor-pointer select-none whitespace-nowrap shrink-0 ${
+                  className={`group inline-flex items-center px-4 md:px-4.5 py-2 rounded-full text-[13px] md:text-[13.5px] font-medium transition-all duration-200 cursor-pointer select-none whitespace-nowrap shrink-0 ${
                     isSelected
                       ? "bg-[#185adb] text-white font-semibold shadow-none"
                       : "bg-white hover:bg-zinc-50 text-zinc-700 border border-zinc-200/90 shadow-none"
@@ -111,7 +189,7 @@ export function TeamPageClient({
           /* Layout eksekutif ketua & wakil */
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
             {filteredMembers.map((member) => (
-              <React.Fragment key={member.id}>
+              <Fragment key={member.id}>
                 {/* Foto potret anggota */}
                 <div className="group relative aspect-[3/4] sm:aspect-auto sm:h-[420px] xl:h-[440px] w-full rounded-[22px] sm:rounded-[28px] overflow-hidden bg-zinc-100 shadow-none transition-all duration-300">
                   <img
@@ -168,7 +246,7 @@ export function TeamPageClient({
                     </a>
                   </div>
                 </div>
-              </React.Fragment>
+              </Fragment>
             ))}
           </div>
         ) : (

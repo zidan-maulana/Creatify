@@ -20,7 +20,7 @@ import type {
   LandingPageContent,
   SiteSettingsContent,
 } from "@/types/cms";
-import { getLandingContent, getSiteSettings } from "@/lib/cms";
+import { getLandingContent } from "@/lib/cms";
 
 const SECTION_KEY_MAP: Record<keyof LandingPageContent, string> = {
   siteSettings: "site_settings",
@@ -246,3 +246,4 @@ export async function resetAllToDefaultAction(): Promise<ApiResponse<null>> {
     );
   }
 }
+

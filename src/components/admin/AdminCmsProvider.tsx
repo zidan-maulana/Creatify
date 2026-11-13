@@ -207,31 +207,22 @@ export function AdminCmsProvider({
   );
   const [toast, setToast] = useState<AdminToastState | null>(null);
 
-  // Sinkronisasi data server PostgreSQL saat inisialisasi
+  // Sinkronisasi otoritatif dengan data server PostgreSQL saat inisialisasi
   useEffect(() => {
     if (initialLandingContent && initialTeamContent) {
-      const current = getClientSnapshot();
-      const hasStoredCustomData = Boolean(
-        typeof window !== "undefined" && window.localStorage.getItem(STORAGE_KEY)
-      );
-
-      // Jika belum ada penyimpanan lokal atau masih default, sinkronkan langsung dengan DB
-      if (!hasStoredCustomData) {
-        const payload: StoredCmsPayload = {
-          landingContent: initialLandingContent,
-          teamContent: initialTeamContent,
-          adminEmail:
-            initialAdminEmail || current.adminEmail || DEFAULT_ADMIN_EMAIL,
-        };
-        try {
-          const serialized = JSON.stringify(payload);
-          window.localStorage.setItem(STORAGE_KEY, serialized);
-          cachedRawSnapshot = serialized;
-          cachedParsedSnapshot = payload;
-          window.dispatchEvent(new Event(CMS_CHANGE_EVENT));
-        } catch {
-          // ignore
-        }
+      const payload: StoredCmsPayload = {
+        landingContent: initialLandingContent,
+        teamContent: initialTeamContent,
+        adminEmail: initialAdminEmail || DEFAULT_ADMIN_EMAIL,
+      };
+      try {
+        const serialized = JSON.stringify(payload);
+        window.localStorage.setItem(STORAGE_KEY, serialized);
+        cachedRawSnapshot = serialized;
+        cachedParsedSnapshot = payload;
+        window.dispatchEvent(new Event(CMS_CHANGE_EVENT));
+      } catch {
+        // Abaikan bila localStorage tidak tersedia
       }
     }
   }, [initialLandingContent, initialTeamContent, initialAdminEmail]);

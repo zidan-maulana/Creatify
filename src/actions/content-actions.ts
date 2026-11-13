@@ -220,7 +220,7 @@ export async function resetAllToDefaultAction(): Promise<ApiResponse<null>> {
           roleTitle: member.role,
           divisionId: member.divisionId,
           photoUrl: member.photo,
-          avatarUrl: member.avatar ?? null,
+          avatarUrl: member.avatar || member.photo,
           quoteText: member.quoteText ?? null,
           instagramUrl: member.instagramUrl ?? null,
           isLeader: member.isLeader ?? false,

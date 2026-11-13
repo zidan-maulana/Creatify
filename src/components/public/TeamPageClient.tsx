@@ -219,7 +219,7 @@ export function TeamPageClient({
                   <div className="pt-4 border-t border-zinc-100 flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3 min-w-0">
                       <img
-                        src={member.avatar || member.photo}
+                        src={member.photo || member.avatar}
                         alt={member.name}
                         className="h-9 w-9 rounded-full object-cover border border-zinc-200/90 shrink-0"
                         loading="lazy"

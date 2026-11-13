@@ -109,3 +109,4 @@ export async function verifyPassword(
 ): Promise<boolean> {
   return await bcrypt.compare(plainText, hashedText);
 }
+

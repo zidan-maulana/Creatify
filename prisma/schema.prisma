@@ -1,9 +1,8 @@
 // Prisma Schema untuk Creatify Digital Portfolio
-// Sesuai Dokumen 05_DATABASE_DESIGN.md
+// Sesuai Dokumen 05_DATABASE_DESIGN.md & FRONTEND_TO_BACKEND_HANDOFF.md
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
 generator client {
@@ -62,15 +61,23 @@ model PortfolioItem {
 }
 
 model TeamMember {
-  id            String   @id @default(uuid()) @db.Uuid
-  name          String   @db.VarChar(150)
-  roleTitle     String   @map("role_title") @db.VarChar(150)
-  photoUrl      String   @map("photo_url") @db.Text
-  photoPublicId String?  @map("photo_public_id") @db.VarChar(255)
-  sortOrder     Int      @default(0) @map("sort_order")
-  createdAt     DateTime @default(now()) @map("created_at")
-  updatedAt     DateTime @updatedAt @map("updated_at")
+  id             String   @id @default(uuid()) @db.Uuid
+  name           String   @db.VarChar(150)
+  roleTitle      String   @map("role_title") @db.VarChar(150)
+  divisionId     String   @map("division_id") @db.VarChar(50)
+  photoUrl       String   @map("photo_url") @db.Text
+  photoPublicId  String?  @map("photo_public_id") @db.VarChar(255)
+  avatarUrl      String?  @map("avatar_url") @db.Text
+  avatarPublicId String?  @map("avatar_public_id") @db.VarChar(255)
+  quoteText      String?  @map("quote_text") @db.Text
+  instagramUrl   String?  @map("instagram_url") @db.VarChar(255)
+  isLeader       Boolean  @default(false) @map("is_leader")
+  sortOrder      Int      @default(0) @map("sort_order")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
 
+  @@index([divisionId])
+  @@index([isLeader])
   @@index([sortOrder])
   @@map("team_members")
 }

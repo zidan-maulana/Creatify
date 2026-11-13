@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { verifySessionCookie } from "@/lib/auth";
 import { deleteMediaAsset } from "@/lib/media";
+import { sanitizeVideoUrl } from "@/lib/video";
 import {
   categorySchema,
   portfolioItemSchema,
@@ -415,7 +416,9 @@ export async function createPortfolioItemAction(
         mediaUrl: data.mediaUrl,
         mediaPublicId: data.mediaPublicId ?? null,
         videoUrl: data.videoUrl ?? null,
-        videoEmbedUrl: data.videoEmbedUrl ?? null,
+        videoEmbedUrl:
+          data.videoEmbedUrl ??
+          (data.videoUrl ? sanitizeVideoUrl(data.videoUrl)?.embedUrl : null),
         description: data.description ?? null,
         releaseDate: data.releaseDate ?? null,
         externalLink: data.externalLink ?? null,
@@ -514,6 +517,8 @@ export async function updatePortfolioItemAction(
         ...(data.videoUrl !== undefined ? { videoUrl: data.videoUrl } : {}),
         ...(data.videoEmbedUrl !== undefined
           ? { videoEmbedUrl: data.videoEmbedUrl }
+          : data.videoUrl
+          ? { videoEmbedUrl: sanitizeVideoUrl(data.videoUrl)?.embedUrl ?? null }
           : {}),
         ...(data.description !== undefined
           ? { description: data.description }
@@ -588,6 +593,68 @@ export async function deletePortfolioItemAction(
     return errorResponse(
       "INTERNAL_ERROR",
       "Terjadi galat basis data saat menghapus karya."
+    );
+  }
+}
+
+/**
+ * Mengubah status unggulan karya (ADR-007: Maksimal 4 karya unggulan aktif)
+ */
+export async function toggleFeaturedPortfolioAction(
+  id: string
+): Promise<ApiResponse<{ id: string; isFeatured: boolean }>> {
+  try {
+    const session = await verifySessionCookie();
+    if (!session) {
+      return errorResponse(
+        "UNAUTHORIZED",
+        "Sesi administrator tidak valid atau telah berakhir."
+      );
+    }
+
+    if (!isValidUuid(id)) {
+      return errorResponse("VALIDATION_ERROR", "ID karya tidak valid.");
+    }
+
+    const existing = await db.portfolioItem.findUnique({ where: { id } });
+    if (!existing) {
+      return errorResponse("NOT_FOUND", "Karya portofolio tidak ditemukan.");
+    }
+
+    const nextFeatured = !existing.isFeatured;
+
+    // ADR-007: Validasi kuota maksimal 4 karya unggulan aktif di Home
+    if (nextFeatured) {
+      const activeFeaturedCount = await db.portfolioItem.count({
+        where: { isFeatured: true },
+      });
+      if (activeFeaturedCount >= 4) {
+        return errorResponse(
+          "VALIDATION_ERROR",
+          "Batas maksimal karya unggulan di halaman utama adalah 4 karya (ADR-007). Nonaktifkan karya unggulan lain terlebih dahulu."
+        );
+      }
+    }
+
+    const updated = await db.portfolioItem.update({
+      where: { id },
+      data: { isFeatured: nextFeatured },
+    });
+
+    revalidatePath("/");
+    revalidatePath("/admin/portfolio");
+
+    return successResponse(
+      { id: updated.id, isFeatured: updated.isFeatured },
+      updated.isFeatured
+        ? "Karya berhasil dijadikan karya unggulan di Home."
+        : "Karya dihapus dari daftar unggulan Home."
+    );
+  } catch (error) {
+    console.error("Gagal mengubah status unggulan karya:", error);
+    return errorResponse(
+      "INTERNAL_ERROR",
+      "Terjadi galat basis data saat mengubah status karya unggulan."
     );
   }
 }

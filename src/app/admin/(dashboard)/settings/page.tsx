@@ -14,6 +14,7 @@ import {
 } from "@/components/admin/AdminField";
 import { useAdminCms } from "@/components/admin/AdminCmsProvider";
 import { mapZodIssues } from "@/components/admin/editors/validation";
+import { changeCredentialsAction } from "@/actions/auth-actions";
 import type { SiteSettingsContent } from "@/types/cms";
 
 const SITE_SETTINGS_FORM_ID = "site-settings-form";
@@ -341,8 +342,9 @@ function AdminAccountForm({
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSaveAccount = (e: React.FormEvent) => {
+  const handleSaveAccount = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentPassword) {
       onValidationError("Masukkan kata sandi lama untuk verifikasi.");
@@ -357,10 +359,30 @@ function AdminAccountForm({
       return;
     }
 
-    onSaveEmail(adminEmail.trim());
-    setCurrentPassword("");
-    setNewPassword("");
-    setConfirmPassword("");
+    setIsSubmitting(true);
+    try {
+      const res = await changeCredentialsAction({
+        currentPassword,
+        newPassword,
+        confirmPassword,
+        newEmail: adminEmail.trim(),
+      });
+
+      if (!res.success) {
+        onValidationError(res.error.message);
+        setIsSubmitting(false);
+        return;
+      }
+
+      onSaveEmail(res.data.email);
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      setIsSubmitting(false);
+    } catch {
+      onValidationError("Terjadi kendala saat memperbarui kredensial.");
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -425,9 +447,10 @@ function AdminAccountForm({
       <div className="pt-1">
         <button
           type="submit"
-          className="w-full rounded-full bg-[#185adb] hover:bg-[#1348b5] px-6 py-2.5 text-[14px] font-medium text-white transition-colors cursor-pointer"
+          disabled={isSubmitting}
+          className="w-full rounded-full bg-[#185adb] hover:bg-[#1348b5] px-6 py-2.5 text-[14px] font-medium text-white transition-colors cursor-pointer disabled:opacity-60"
         >
-          Perbarui Kredensial
+          {isSubmitting ? "Memproses..." : "Perbarui Kredensial"}
         </button>
       </div>
     </form>

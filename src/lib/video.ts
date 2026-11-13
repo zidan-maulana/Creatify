@@ -52,3 +52,4 @@ export function sanitizeVideoUrl(url?: string | null): SanitizedVideoResult | nu
 export function isValidVideoUrl(url?: string | null): boolean {
   return sanitizeVideoUrl(url) !== null;
 }
+

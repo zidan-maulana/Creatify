@@ -2,7 +2,7 @@
 
 import React, { Suspense, useState } from "react";
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   LayoutDashboard,
   FileEdit,
@@ -23,6 +23,7 @@ import {
   type LandingTabKey,
 } from "@/config/admin-landing-sections";
 import { cn } from "@/lib/utils";
+import { logoutAction } from "@/actions/auth-actions";
 
 function getEmailInitials(email: string): string {
   const local = email.split("@")[0]?.trim() || "A";
@@ -197,6 +198,7 @@ function SidebarNavWithSearchParams({
 }
 
 export function AdminShell({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
   const pathname = usePathname();
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const [landingMenuState, setLandingMenuState] = useState<{
@@ -254,12 +256,17 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         <AnimatedArrowBadge size="sm" variant="white" />
       </Link>
 
-      <Link
-        href="/admin/login"
-        onClick={onNavigate}
+      <button
+        type="button"
+        onClick={async () => {
+          onNavigate?.();
+          await logoutAction();
+          router.push("/admin/login");
+          router.refresh();
+        }}
         aria-label={`Keluar Admin (${adminEmail})`}
         title={`Keluar Admin · ${adminEmail}`}
-        className="group flex items-center gap-2.5 rounded-full border border-zinc-200/90 bg-white pl-2 pr-3.5 py-2 hover:bg-zinc-50 hover:border-zinc-300 transition-colors select-none"
+        className="w-full group flex items-center gap-2.5 rounded-full border border-zinc-200/90 bg-white pl-2 pr-3.5 py-2 hover:bg-zinc-50 hover:border-zinc-300 transition-colors select-none cursor-pointer"
       >
         <span
           aria-hidden="true"
@@ -268,12 +275,12 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           {avatarInitials}
         </span>
 
-        <span className="min-w-0 flex-1 truncate text-[12.5px] font-medium text-[#0c0f1d] leading-snug">
+        <span className="min-w-0 flex-1 truncate text-left text-[12.5px] font-medium text-[#0c0f1d] leading-snug">
           {adminEmail}
         </span>
 
         <LogOut className="h-4 w-4 text-zinc-400 group-hover:text-red-500 transition-colors shrink-0" />
-      </Link>
+      </button>
     </div>
   );
 

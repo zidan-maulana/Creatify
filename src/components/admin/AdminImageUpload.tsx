@@ -3,58 +3,13 @@
 import React, { useRef, useState } from "react";
 import { Upload, ImagePlus, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { uploadMediaAction } from "@/actions/media-actions";
 
 const ACCEPTED_MIME_TYPES = new Set([
   "image/jpeg",
   "image/png",
   "image/webp",
 ]);
-
-// Kompresi ringan di sisi klien agar pratinjau lokal tidak membebani penyimpanan browser
-async function processImageFile(
-  file: File,
-  maxSizeMb: number
-): Promise<string> {
-  if (!ACCEPTED_MIME_TYPES.has(file.type)) {
-    throw new Error("Format tidak didukung. Gunakan file JPG, PNG, atau WEBP.");
-  }
-
-  if (file.size > maxSizeMb * 1024 * 1024) {
-    throw new Error(`Ukuran gambar melebihi batas maksimal ${maxSizeMb} MB.`);
-  }
-
-  const rawDataUrl = await new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result ?? ""));
-    reader.onerror = () => reject(new Error("Gagal membaca berkas gambar."));
-    reader.readAsDataURL(file);
-  });
-
-  const img = await new Promise<HTMLImageElement>((resolve, reject) => {
-    const image = new Image();
-    image.onload = () => resolve(image);
-    image.onerror = () => reject(new Error("Berkas gambar tidak dapat diproses."));
-    image.src = rawDataUrl;
-  });
-
-  const maxDimension = 1280;
-  const scale = Math.min(1, maxDimension / Math.max(img.width, img.height));
-  const targetWidth = Math.max(1, Math.round(img.width * scale));
-  const targetHeight = Math.max(1, Math.round(img.height * scale));
-
-  const canvas = document.createElement("canvas");
-  canvas.width = targetWidth;
-  canvas.height = targetHeight;
-
-  const ctx = canvas.getContext("2d");
-  if (!ctx) return rawDataUrl;
-
-  ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
-  const targetMime = file.type === "image/png" ? "image/webp" : file.type;
-  const compressed = canvas.toDataURL(targetMime, 0.84);
-
-  return compressed.length < rawDataUrl.length ? compressed : rawDataUrl;
-}
 
 interface AdminImageUploadProps {
   id: string;
@@ -98,10 +53,29 @@ export function AdminImageUpload({
     if (!file) return;
 
     setLocalError("");
+
+    if (!ACCEPTED_MIME_TYPES.has(file.type)) {
+      setLocalError("Format tidak didukung. Gunakan file JPG, PNG, atau WEBP.");
+      return;
+    }
+
+    if (file.size > maxSizeMb * 1024 * 1024) {
+      setLocalError(`Ukuran gambar melebihi batas maksimal ${maxSizeMb} MB.`);
+      return;
+    }
+
     setIsProcessing(true);
     try {
-      const processedUrl = await processImageFile(file, maxSizeMb);
-      onChange(processedUrl);
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await uploadMediaAction(formData);
+      if (!res.success) {
+        setLocalError(res.error.message || "Gagal mengunggah gambar.");
+        return;
+      }
+
+      onChange(res.data.url);
     } catch (err) {
       setLocalError(
         err instanceof Error ? err.message : "Gagal memproses gambar."

@@ -17,6 +17,7 @@ import {
   DEFAULT_ADMIN_EMAIL,
   setStoredAdminEmail,
 } from "@/components/admin/AdminCmsProvider";
+import { loginAction } from "@/actions/auth-actions";
 
 function GoogleLogoIcon() {
   return (
@@ -55,7 +56,7 @@ export default function AdminLoginPage() {
   const [viewMode, setViewMode] = useState<"login" | "forgot">("login");
   const [resetSent, setResetSent] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
 
@@ -64,9 +65,26 @@ export default function AdminLoginPage() {
       return;
     }
 
-    setStoredAdminEmail(email.trim());
     setIsSubmitting(true);
-    router.push("/admin");
+    try {
+      const res = await loginAction({
+        email: email.trim(),
+        password,
+      });
+
+      if (!res.success) {
+        setError(res.error.message || "Gagal masuk. Periksa kembali kredensial Anda.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      setStoredAdminEmail(res.data.user.email);
+      router.push("/admin");
+      router.refresh();
+    } catch {
+      setError("Terjadi kendala jaringan saat menghubungi server.");
+      setIsSubmitting(false);
+    }
   };
 
   const handleGoogleLogin = () => {

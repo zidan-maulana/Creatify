@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState, useCallback } from "react";
+import React, { useEffect, useRef, useState, useCallback, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import {
   X,
@@ -11,9 +11,10 @@ import {
   Check,
   Move,
   Loader2,
-  Maximize2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+const emptySubscribe = () => () => {};
 
 interface ImageCropModalProps {
   isOpen: boolean;
@@ -32,7 +33,11 @@ export function ImageCropModal({
   aspectRatioValue = 16 / 9,
   onApply,
 }: ImageCropModalProps) {
-  const [mounted, setMounted] = useState(false);
+  const isMounted = useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  );
   const [imageLoaded, setImageLoaded] = useState(false);
   const [naturalSize, setNaturalSize] = useState({ width: 0, height: 0 });
 
@@ -51,22 +56,6 @@ export function ImageCropModal({
 
   const viewportRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  // Reset state saat modal dibuka dengan gambar baru
-  useEffect(() => {
-    if (isOpen) {
-      setZoom(1);
-      setPan({ x: 0, y: 0 });
-      setRotation(0);
-      setImageLoaded(false);
-      setErrorMsg("");
-      setIsApplying(false);
-    }
-  }, [isOpen, imageSrc]);
 
   // Lock body scroll saat modal aktif
   useEffect(() => {
@@ -272,7 +261,7 @@ export function ImageCropModal({
     }
   };
 
-  if (!isOpen || !mounted) return null;
+  if (!isOpen || !isMounted) return null;
 
   const { width: cropBoxW, height: cropBoxH } = getCropBoxDimensions();
 

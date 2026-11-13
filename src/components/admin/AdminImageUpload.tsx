@@ -323,17 +323,20 @@ export function AdminImageUpload({
       )}
 
       {/* Modal Crop & Sesuaikan Posisi (TikTok Style) */}
-      <ImageCropModal
-        isOpen={isCropOpen}
-        onClose={() => {
-          setIsCropOpen(false);
-          cleanupBlobUrl();
-        }}
-        imageSrc={cropSrc}
-        aspectRatioValue={aspectDetails.value}
-        aspectRatioLabel={aspectDetails.label}
-        onApply={handleApplyCroppedImage}
-      />
+      {isCropOpen && (
+        <ImageCropModal
+          key={cropSrc}
+          isOpen={isCropOpen}
+          onClose={() => {
+            setIsCropOpen(false);
+            cleanupBlobUrl();
+          }}
+          imageSrc={cropSrc}
+          aspectRatioValue={aspectDetails.value}
+          aspectRatioLabel={aspectDetails.label}
+          onApply={handleApplyCroppedImage}
+        />
+      )}
     </div>
   );
 }

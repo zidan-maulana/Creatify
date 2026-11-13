@@ -28,6 +28,16 @@ import type {
   TeamPageContent,
 } from "@/types/cms";
 import type { TeamMember } from "@/data/team";
+import {
+  updateLandingSectionAction,
+  updateSiteSettingsAction,
+  resetAllToDefaultAction,
+} from "@/actions/content-actions";
+import {
+  updateTeamHeaderAction,
+  upsertTeamMemberAction,
+  deleteTeamMemberAction,
+} from "@/actions/team-actions";
 
 const STORAGE_KEY = "creatify-admin-cms-v1";
 const CMS_CHANGE_EVENT = "creatify-cms-change";
@@ -172,7 +182,19 @@ interface AdminCmsContextValue {
 
 const AdminCmsContext = createContext<AdminCmsContextValue | null>(null);
 
-export function AdminCmsProvider({ children }: { children: React.ReactNode }) {
+export interface AdminCmsProviderProps {
+  children: React.ReactNode;
+  initialLandingContent?: LandingPageContent;
+  initialTeamContent?: TeamPageContent;
+  initialAdminEmail?: string;
+}
+
+export function AdminCmsProvider({
+  children,
+  initialLandingContent,
+  initialTeamContent,
+  initialAdminEmail,
+}: AdminCmsProviderProps) {
   const store = useSyncExternalStore(
     subscribeToCmsStore,
     getClientSnapshot,
@@ -184,6 +206,35 @@ export function AdminCmsProvider({ children }: { children: React.ReactNode }) {
     () => false
   );
   const [toast, setToast] = useState<AdminToastState | null>(null);
+
+  // Sinkronisasi data server PostgreSQL saat inisialisasi
+  useEffect(() => {
+    if (initialLandingContent && initialTeamContent) {
+      const current = getClientSnapshot();
+      const hasStoredCustomData = Boolean(
+        typeof window !== "undefined" && window.localStorage.getItem(STORAGE_KEY)
+      );
+
+      // Jika belum ada penyimpanan lokal atau masih default, sinkronkan langsung dengan DB
+      if (!hasStoredCustomData) {
+        const payload: StoredCmsPayload = {
+          landingContent: initialLandingContent,
+          teamContent: initialTeamContent,
+          adminEmail:
+            initialAdminEmail || current.adminEmail || DEFAULT_ADMIN_EMAIL,
+        };
+        try {
+          const serialized = JSON.stringify(payload);
+          window.localStorage.setItem(STORAGE_KEY, serialized);
+          cachedRawSnapshot = serialized;
+          cachedParsedSnapshot = payload;
+          window.dispatchEvent(new Event(CMS_CHANGE_EVENT));
+        } catch {
+          // ignore
+        }
+      }
+    }
+  }, [initialLandingContent, initialTeamContent, initialAdminEmail]);
 
   useEffect(() => {
     if (!toast || toast.type === "error") return;
@@ -201,14 +252,16 @@ export function AdminCmsProvider({ children }: { children: React.ReactNode }) {
   const dismissToast = useCallback(() => setToast(null), []);
 
   const persistStore = useCallback(
-    (nextPayload: StoredCmsPayload, successMessage: string) => {
+    (nextPayload: StoredCmsPayload, successMessage?: string) => {
       try {
         const serialized = JSON.stringify(nextPayload);
         window.localStorage.setItem(STORAGE_KEY, serialized);
         cachedRawSnapshot = serialized;
         cachedParsedSnapshot = nextPayload;
         window.dispatchEvent(new Event(CMS_CHANGE_EVENT));
-        showToast("success", successMessage);
+        if (successMessage) {
+          showToast("success", successMessage);
+        }
       } catch {
         showToast(
           "error",
@@ -233,8 +286,18 @@ export function AdminCmsProvider({ children }: { children: React.ReactNode }) {
         },
         successMessage
       );
+
+      // Sinkronisasi permanen ke basis data via Server Action
+      updateLandingSectionAction(key, value).then((res) => {
+        if (!res.success) {
+          showToast(
+            "error",
+            res.error.message || `Gagal menyimpan seksi ${String(key)} ke database.`
+          );
+        }
+      });
     },
-    [persistStore]
+    [persistStore, showToast]
   );
 
   const updateAdminEmail = useCallback(
@@ -254,13 +317,19 @@ export function AdminCmsProvider({ children }: { children: React.ReactNode }) {
   );
 
   const updateSiteSettings = useCallback(
-    (settings: SiteSettingsContent) =>
+    (settings: SiteSettingsContent) => {
       saveLandingSection(
         "siteSettings",
         settings,
         "Pengaturan situs & kontak resmi berhasil diperbarui."
-      ),
-    [saveLandingSection]
+      );
+      updateSiteSettingsAction(settings).then((res) => {
+        if (!res.success) {
+          showToast("error", res.error.message);
+        }
+      });
+    },
+    [saveLandingSection, showToast]
   );
 
   const updateHero = useCallback(
@@ -319,8 +388,14 @@ export function AdminCmsProvider({ children }: { children: React.ReactNode }) {
         },
         "Header halaman Tim berhasil disimpan."
       );
+
+      updateTeamHeaderAction(header).then((res) => {
+        if (!res.success) {
+          showToast("error", res.error.message);
+        }
+      });
     },
-    [persistStore]
+    [persistStore, showToast]
   );
 
   const upsertTeamMember = useCallback(
@@ -342,8 +417,34 @@ export function AdminCmsProvider({ children }: { children: React.ReactNode }) {
         },
         `Profil ${member.name} berhasil disimpan.`
       );
+
+      upsertTeamMemberAction({
+        id: member.id,
+        name: member.name,
+        role: member.role,
+        divisionId: member.divisionId,
+        photo: member.photo,
+        avatar: member.avatar,
+        quoteText: member.quoteText,
+        instagramUrl: member.instagramUrl,
+        isLeader: Boolean(member.isLeader),
+      }).then((res) => {
+        if (!res.success) {
+          showToast("error", res.error.message);
+        } else if (res.data) {
+          const saved = res.data;
+          const fresh = getClientSnapshot();
+          const updated = fresh.teamContent.members.map((m) =>
+            m.id === member.id || m.name === saved.name ? saved : m
+          );
+          persistStore({
+            ...fresh,
+            teamContent: { ...fresh.teamContent, members: updated },
+          });
+        }
+      });
     },
-    [persistStore]
+    [persistStore, showToast]
   );
 
   const deleteTeamMember = useCallback(
@@ -366,20 +467,32 @@ export function AdminCmsProvider({ children }: { children: React.ReactNode }) {
           ? `${target.name} dihapus dari daftar tim.`
           : "Anggota tim berhasil dihapus."
       );
+
+      deleteTeamMemberAction(memberId).then((res) => {
+        if (!res.success) {
+          showToast("error", res.error.message);
+        }
+      });
     },
-    [persistStore]
+    [persistStore, showToast]
   );
 
   const resetAllToDefault = useCallback(() => {
-    try {
-      window.localStorage.removeItem(STORAGE_KEY);
-      cachedRawSnapshot = null;
-      cachedParsedSnapshot = SERVER_SNAPSHOT;
-      window.dispatchEvent(new Event(CMS_CHANGE_EVENT));
-      showToast("success", "Seluruh konten dikembalikan ke data bawaan.");
-    } catch {
-      showToast("error", "Gagal mereset penyimpanan lokal.");
-    }
+    resetAllToDefaultAction().then((res) => {
+      if (!res.success) {
+        showToast("error", res.error.message);
+      } else {
+        try {
+          window.localStorage.removeItem(STORAGE_KEY);
+          cachedRawSnapshot = null;
+          cachedParsedSnapshot = SERVER_SNAPSHOT;
+          window.dispatchEvent(new Event(CMS_CHANGE_EVENT));
+          showToast("success", "Seluruh konten dikembalikan ke data bawaan database.");
+        } catch {
+          showToast("error", "Gagal mereset penyimpanan lokal.");
+        }
+      }
+    });
   }, [showToast]);
 
   const contextValue = useMemo<AdminCmsContextValue>(

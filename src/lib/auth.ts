@@ -93,6 +93,9 @@ export async function getSessionFromCookie(): Promise<AuthSessionUser | null> {
   return await verifySessionToken(token);
 }
 
+export const verifySessionCookie = getSessionFromCookie;
+export const getCurrentAdminSession = getSessionFromCookie;
+
 /**
  * Utilitas hashing kata sandi administrator (Bcrypt salt rounds 12)
  */

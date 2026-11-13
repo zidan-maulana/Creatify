@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { AdminCmsProvider } from "@/components/admin/AdminCmsProvider";
 import { AdminShell } from "@/components/admin/AdminShell";
 import { getLandingContent, getTeamPageContent } from "@/lib/cms";
@@ -8,17 +9,21 @@ export default async function AdminDashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const [landingContent, teamPageData, session] = await Promise.all([
+  const session = await getCurrentAdminSession();
+  if (!session) {
+    redirect("/admin/login");
+  }
+
+  const [landingContent, teamPageData] = await Promise.all([
     getLandingContent(),
     getTeamPageContent(),
-    getCurrentAdminSession(),
   ]);
 
   return (
     <AdminCmsProvider
       initialLandingContent={landingContent}
       initialTeamContent={teamPageData.content}
-      initialAdminEmail={session?.email}
+      initialAdminEmail={session.email}
     >
       <AdminShell>{children}</AdminShell>
     </AdminCmsProvider>

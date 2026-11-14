@@ -436,10 +436,10 @@ export function HeroSection({
             {/* Autoplaying Showcase Video: Hybrid Support (YouTube / Vimeo / MP4) */}
             {sanitizedVideo ? (
               <iframe
-                src={`${sanitizedVideo.embedUrl}?autoplay=1&mute=1&loop=1&playlist=${sanitizedVideo.videoId}&controls=0&modestbranding=1&playsinline=1&rel=0`}
+                src={`${sanitizedVideo.embedUrl}?autoplay=1&mute=1&loop=1&playlist=${sanitizedVideo.videoId}&controls=0&modestbranding=1&playsinline=1&rel=0&iv_load_policy=3&disablekb=1&fs=0`}
                 title="Showcase Video Creatify"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                className="h-full w-full object-cover pointer-events-none scale-[1.04]"
+                className="h-full w-full object-cover pointer-events-none scale-[1.32] -translate-y-[5%]"
               />
             ) : (
               <video

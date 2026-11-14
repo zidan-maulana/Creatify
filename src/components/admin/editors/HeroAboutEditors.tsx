@@ -11,6 +11,7 @@ import {
   AdminTextareaField,
 } from "@/components/admin/AdminField";
 import { AdminImageUpload } from "@/components/admin/AdminImageUpload";
+import { AdminVideoUpload } from "@/components/admin/AdminVideoUpload";
 import { useAdminCms } from "@/components/admin/AdminCmsProvider";
 import { mapZodIssues } from "@/components/admin/editors/validation";
 import { LANDING_FORM_IDS } from "@/config/admin-landing-sections";
@@ -125,14 +126,13 @@ export function HeroEditor() {
           </p>
         </div>
 
-        <AdminTextField
+        <AdminVideoUpload
           id="hero-video-url"
-          label="Path / URL Video Showcase (MP4)"
+          label="Sumber Video Showcase Hero"
           value={form.videoUrl}
           onChange={(v) => setForm((p) => ({ ...p, videoUrl: v }))}
           error={errors.videoUrl}
-          placeholder="/videos/showcase.mp4"
-          required
+          defaultValue="/videos/showcase.mp4"
         />
       </div>
     </form>

@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback, type CSSProperties } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo, type CSSProperties } from "react";
 import { Play, Pause, Maximize2, X } from "lucide-react";
 import { AnimatedArrowBadge } from "@/components/ui/AnimatedArrowBadge";
 import { PublicNavbar, LandingSectionId } from "@/components/public/PublicNavbar";
 import { useDismissableLayers } from "@/hooks/useDismissableLayer";
+import { sanitizeVideoUrl } from "@/lib/video";
 import {
   DEFAULT_LANDING_CONTENT,
   DEFAULT_SITE_SETTINGS,
@@ -33,6 +34,11 @@ export function HeroSection({
   const videoRef = useRef<HTMLVideoElement>(null);
   const videoContainerRef = useRef<HTMLDivElement>(null);
   const videoFrameRef = useRef<HTMLDivElement>(null);
+
+  const sanitizedVideo = useMemo(
+    () => sanitizeVideoUrl(content.videoUrl),
+    [content.videoUrl]
+  );
 
   useDismissableLayers([
     {
@@ -427,43 +433,54 @@ export function HeroSection({
             }}
             className="group relative [--hero-video-scale:1] md:[--hero-video-scale:0.7] w-full max-w-[360px] sm:max-w-[440px] md:max-w-[97vw] aspect-[9/14] sm:aspect-[3/4] md:aspect-video overflow-hidden rounded-[26px] sm:rounded-[36px] md:rounded-[54px] bg-zinc-950/90 [transform:translateZ(0)] isolate cursor-pointer md:cursor-default"
           >
-            {/* Autoplaying Showcase Video */}
-            <video
-              ref={videoRef}
-              autoPlay
-              loop
-              muted
-              playsInline
-              preload="metadata"
-              className="h-full w-full object-cover"
-            >
-              <source src={content.videoUrl} type="video/mp4" />
-            </video>
+            {/* Autoplaying Showcase Video: Hybrid Support (YouTube / Vimeo / MP4) */}
+            {sanitizedVideo ? (
+              <iframe
+                src={`${sanitizedVideo.embedUrl}?autoplay=1&mute=1&loop=1&playlist=${sanitizedVideo.videoId}&controls=0&modestbranding=1&playsinline=1&rel=0`}
+                title="Showcase Video Creatify"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                className="h-full w-full object-cover pointer-events-none scale-[1.04]"
+              />
+            ) : (
+              <video
+                ref={videoRef}
+                autoPlay
+                loop
+                muted
+                playsInline
+                preload="metadata"
+                className="h-full w-full object-cover"
+              >
+                <source src={content.videoUrl} type="video/mp4" />
+              </video>
+            )}
 
             {/* Subtle Glass Tint Gradient Overlay (khusus desktop) */}
             <div className="hidden md:block pointer-events-none absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/20" />
 
-            {/* Kontrol play/pause desktop (hover overlay) */}
-            <div className="hidden md:flex absolute inset-0 items-center justify-center pointer-events-none">
-              <button
-                type="button"
-                onClick={togglePlayPause}
-                className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100 focus-visible:pointer-events-auto pointer-events-none group-hover:pointer-events-auto inline-flex items-center gap-2 rounded-full bg-white/95 hover:bg-white text-zinc-950 px-5 py-2.5 text-sm font-medium shadow-[0_12px_36px_rgba(0,0,0,0.3)] backdrop-blur-md transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer"
-                aria-label={isPlaying ? "Pause Video" : "Play Video"}
-              >
-                {isPlaying ? (
-                  <>
-                    <Pause className="h-4 w-4 fill-zinc-950" />
-                    <span>Pause Video</span>
-                  </>
-                ) : (
-                  <>
-                    <Play className="h-4 w-4 fill-zinc-950 ml-0.5" />
-                    <span>Play Video</span>
-                  </>
-                )}
-              </button>
-            </div>
+            {/* Kontrol play/pause desktop (hover overlay, hanya untuk native video) */}
+            {!sanitizedVideo && (
+              <div className="hidden md:flex absolute inset-0 items-center justify-center pointer-events-none">
+                <button
+                  type="button"
+                  onClick={togglePlayPause}
+                  className="opacity-0 group-hover:opacity-100 focus-visible:opacity-100 focus-visible:pointer-events-auto pointer-events-none group-hover:pointer-events-auto inline-flex items-center gap-2 rounded-full bg-white/95 hover:bg-white text-zinc-950 px-5 py-2.5 text-sm font-medium shadow-[0_12px_36px_rgba(0,0,0,0.3)] backdrop-blur-md transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer"
+                  aria-label={isPlaying ? "Pause Video" : "Play Video"}
+                >
+                  {isPlaying ? (
+                    <>
+                      <Pause className="h-4 w-4 fill-zinc-950" />
+                      <span>Pause Video</span>
+                    </>
+                  ) : (
+                    <>
+                      <Play className="h-4 w-4 fill-zinc-950 ml-0.5" />
+                      <span>Play Video</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
 
             {/* Tombol Lihat Penuh di tengah card saat di-hover atau ditekan (khusus mobile) */}
             <div
@@ -519,15 +536,25 @@ export function HeroSection({
             </div>
 
             <div className="relative w-full aspect-video overflow-hidden rounded-[18px] bg-black border border-white/15 shadow-2xl">
-              <video
-                autoPlay
-                controls
-                loop
-                playsInline
-                className="h-full w-full object-contain"
-              >
-                <source src={content.videoUrl} type="video/mp4" />
-              </video>
+              {sanitizedVideo ? (
+                <iframe
+                  src={`${sanitizedVideo.embedUrl}?autoplay=1&controls=1&rel=0`}
+                  title="Full Video Showcase"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                  allowFullScreen
+                  className="h-full w-full object-contain"
+                />
+              ) : (
+                <video
+                  autoPlay
+                  controls
+                  loop
+                  playsInline
+                  className="h-full w-full object-contain"
+                >
+                  <source src={content.videoUrl} type="video/mp4" />
+                </video>
+              )}
             </div>
           </div>
         </div>

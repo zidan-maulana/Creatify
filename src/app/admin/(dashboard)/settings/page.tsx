@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { RotateCcw } from "lucide-react";
 import {
   LANDING_CONTENT_LIMITS,
@@ -13,8 +13,13 @@ import {
   AdminTextareaField,
 } from "@/components/admin/AdminField";
 import { useAdminCms } from "@/components/admin/AdminCmsProvider";
+import {
+  useUnsavedChanges,
+  useDirtyTracker,
+} from "@/components/admin/UnsavedChangesProvider";
 import { mapZodIssues } from "@/components/admin/editors/validation";
 import { changeCredentialsAction } from "@/actions/auth-actions";
+import { cn } from "@/lib/utils";
 import type { SiteSettingsContent } from "@/types/cms";
 
 const SITE_SETTINGS_FORM_ID = "site-settings-form";
@@ -29,6 +34,7 @@ export default function AdminSettingsPage() {
     resetAllToDefault,
     showToast,
   } = useAdminCms();
+  const { isDirty } = useUnsavedChanges();
 
   const [confirmResetOpen, setConfirmResetOpen] = useState(false);
 
@@ -41,7 +47,11 @@ export default function AdminSettingsPage() {
           <button
             type="submit"
             form={SITE_SETTINGS_FORM_ID}
-            className="inline-flex items-center justify-center rounded-full bg-[#185adb] hover:bg-[#1348b5] px-6 py-2.5 text-[14px] font-medium text-white transition-colors cursor-pointer whitespace-nowrap"
+            className={cn(
+              "inline-flex items-center justify-center rounded-full bg-[#185adb] hover:bg-[#1348b5] px-6 py-2.5 text-[14px] font-medium text-white transition-all cursor-pointer whitespace-nowrap",
+              isDirty &&
+                "shadow-[0_4px_16px_rgba(24,90,219,0.35)] ring-2 ring-[#185adb]/30 font-semibold"
+            )}
           >
             Simpan Perubahan
           </button>
@@ -117,6 +127,12 @@ function SiteSettingsForm({
 }) {
   const [form, setForm] = useState<SiteSettingsContent>(initialSettings);
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const isDirty = useMemo(
+    () => JSON.stringify(form) !== JSON.stringify(initialSettings),
+    [form, initialSettings]
+  );
+  useDirtyTracker(isDirty, "Kontak & Pengaturan Situs");
 
   const handleSaveSiteSettings = (e: React.FormEvent) => {
     e.preventDefault();
@@ -343,6 +359,16 @@ function AdminAccountForm({
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const isAccountDirty = useMemo(
+    () =>
+      adminEmail !== initialEmail ||
+      Boolean(currentPassword) ||
+      Boolean(newPassword) ||
+      Boolean(confirmPassword),
+    [adminEmail, initialEmail, currentPassword, newPassword, confirmPassword]
+  );
+  useDirtyTracker(isAccountDirty, "Kredensial Akun Administrator");
 
   const handleSaveAccount = async (e: React.FormEvent) => {
     e.preventDefault();

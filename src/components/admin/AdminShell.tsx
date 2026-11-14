@@ -17,6 +17,7 @@ import { BrandLogo } from "@/components/ui/BrandLogo";
 import { AnimatedArrowBadge } from "@/components/ui/AnimatedArrowBadge";
 import { AdminToast } from "@/components/admin/AdminField";
 import { useAdminCms } from "@/components/admin/AdminCmsProvider";
+import { useUnsavedChanges } from "@/components/admin/UnsavedChangesProvider";
 import {
   LANDING_SECTION_NAV,
   resolveLandingTabKey,
@@ -60,15 +61,37 @@ function SidebarNavContent({
   onToggleLanding,
   onNavigate,
 }: SidebarNavContentProps) {
+  const router = useRouter();
+  const { isDirty, confirmNavigation } = useUnsavedChanges();
   const isOverviewActive = pathname === "/admin";
   const isLandingRoute = pathname.startsWith("/admin/landing");
   const TopIcon = TOP_NAV_ITEM.icon;
+
+  const handleLinkClick = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    href: string,
+    isCurrentActive?: boolean
+  ) => {
+    if (isCurrentActive) {
+      e.preventDefault();
+      return;
+    }
+    if (isDirty) {
+      e.preventDefault();
+      confirmNavigation(() => {
+        onNavigate?.();
+        router.push(href);
+      });
+    } else {
+      onNavigate?.();
+    }
+  };
 
   return (
     <nav aria-label="Navigasi CMS Admin" className="space-y-1.5">
       <Link
         href={TOP_NAV_ITEM.href}
-        onClick={onNavigate}
+        onClick={(e) => handleLinkClick(e, TOP_NAV_ITEM.href, isOverviewActive)}
         className={cn(
           "flex items-center gap-3 rounded-full px-4 py-2.5 text-[14px] font-medium transition-colors duration-200 select-none",
           isOverviewActive
@@ -92,7 +115,7 @@ function SidebarNavContent({
         >
           <Link
             href="/admin/landing"
-            onClick={onNavigate}
+            onClick={(e) => handleLinkClick(e, "/admin/landing")}
             className="flex-1 flex items-center gap-3 min-w-0 py-2.5 pl-4 pr-2 text-[14px] font-medium"
           >
             <FileEdit
@@ -124,11 +147,12 @@ function SidebarNavContent({
           <div className="mt-1.5 ml-4 pl-3 border-l border-zinc-200/80 space-y-1">
             {LANDING_SECTION_NAV.map((sec) => {
               const isSubActive = isLandingRoute && activeTab === sec.key;
+              const href = `/admin/landing?tab=${sec.key}`;
               return (
                 <Link
                   key={sec.key}
-                  href={`/admin/landing?tab=${sec.key}`}
-                  onClick={onNavigate}
+                  href={href}
+                  onClick={(e) => handleLinkClick(e, href, isSubActive)}
                   className={cn(
                     "flex items-center gap-2 rounded-full px-3 py-2 text-[13px] font-medium transition-colors select-none",
                     isSubActive
@@ -160,7 +184,7 @@ function SidebarNavContent({
           <Link
             key={item.href}
             href={item.href}
-            onClick={onNavigate}
+            onClick={(e) => handleLinkClick(e, item.href, isActive)}
             className={cn(
               "flex items-center gap-3 rounded-full px-4 py-2.5 text-[14px] font-medium transition-colors duration-200 select-none",
               isActive
@@ -206,6 +230,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
     open: boolean;
   } | null>(null);
   const { landingContent, adminEmail, toast, dismissToast } = useAdminCms();
+  const { isDirty, confirmNavigation } = useUnsavedChanges();
 
   const isLandingRoute = pathname.startsWith("/admin/landing");
   const isLandingExpanded =
@@ -258,11 +283,18 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
 
       <button
         type="button"
-        onClick={async () => {
-          onNavigate?.();
-          await logoutAction();
-          router.push("/admin/login");
-          router.refresh();
+        onClick={() => {
+          const proceedLogout = async () => {
+            onNavigate?.();
+            await logoutAction();
+            router.push("/admin/login");
+            router.refresh();
+          };
+          if (isDirty) {
+            confirmNavigation(proceedLogout);
+          } else {
+            proceedLogout();
+          }
         }}
         aria-label={`Keluar Admin (${adminEmail})`}
         title={`Keluar Admin · ${adminEmail}`}
@@ -294,9 +326,17 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
         <div className="space-y-6">
           <div className="flex items-center justify-between px-1.5 pt-1">
             <BrandLogo variant="blue" label={landingContent.siteSettings.name} />
-            <span className="rounded-full bg-[#185adb]/10 px-2.5 py-0.5 text-[11px] font-semibold text-[#185adb]">
-              CMS
-            </span>
+            <div className="flex items-center gap-1.5">
+              {isDirty && (
+                <span
+                  title="Ada perubahan belum disimpan"
+                  className="flex h-2 w-2 rounded-full bg-amber-500 animate-ping"
+                />
+              )}
+              <span className="rounded-full bg-[#185adb]/10 px-2.5 py-0.5 text-[11px] font-semibold text-[#185adb]">
+                CMS
+              </span>
+            </div>
           </div>
 
           {renderNavLinks()}
@@ -342,7 +382,15 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
       <div className="flex-1 min-w-0 flex flex-col">
         {/* Kontrol drawer khusus layar kecil */}
         <div className="lg:hidden sticky top-0 z-30 h-16 bg-white/95 backdrop-blur-md border-b border-zinc-200/80 px-5 flex items-center justify-between">
-          <BrandLogo variant="blue" label={landingContent.siteSettings.name} />
+          <div className="flex items-center gap-2">
+            <BrandLogo variant="blue" label={landingContent.siteSettings.name} />
+            {isDirty && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10.5px] font-medium bg-amber-50 text-amber-700 border border-amber-200/80">
+                <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />
+                Draft
+              </span>
+            )}
+          </div>
           <button
             type="button"
             onClick={() => setMobileDrawerOpen(true)}

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Plus, Trash2, ChevronDown } from "lucide-react";
 import {
   LANDING_CONTENT_LIMITS,
@@ -12,6 +12,7 @@ import {
   AdminTextareaField,
 } from "@/components/admin/AdminField";
 import { useAdminCms } from "@/components/admin/AdminCmsProvider";
+import { useDirtyTracker } from "@/components/admin/UnsavedChangesProvider";
 import { mapZodIssues } from "@/components/admin/editors/validation";
 import { LANDING_FORM_IDS } from "@/config/admin-landing-sections";
 import { cn } from "@/lib/utils";
@@ -27,6 +28,12 @@ export function FaqEditor() {
   const [form, setForm] = useState<FaqSectionContent>(landingContent.faq);
   const [openIdx, setOpenIdx] = useState<number>(0);
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const isDirty = useMemo(
+    () => JSON.stringify(form) !== JSON.stringify(landingContent.faq),
+    [form, landingContent.faq]
+  );
+  useDirtyTracker(isDirty, "Section FAQ");
 
   const updateItem = (idx: number, patch: Partial<FaqItemContent>) => {
     setForm((prev) => ({
@@ -261,6 +268,12 @@ export function ContactFooterEditor() {
     landingContent.contact
   );
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const isDirty = useMemo(
+    () => JSON.stringify(form) !== JSON.stringify(landingContent.contact),
+    [form, landingContent.contact]
+  );
+  useDirtyTracker(isDirty, "Section Rekrutmen & Kontak");
 
   const updateDivisionOption = (
     idx: number,

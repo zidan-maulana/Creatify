@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Plus, ChevronDown } from "lucide-react";
 import {
   DEFAULT_LANDING_CONTENT,
@@ -13,6 +13,7 @@ import {
 } from "@/components/admin/AdminField";
 import { AdminImageUpload } from "@/components/admin/AdminImageUpload";
 import { useAdminCms } from "@/components/admin/AdminCmsProvider";
+import { useDirtyTracker } from "@/components/admin/UnsavedChangesProvider";
 import { mapZodIssues } from "@/components/admin/editors/validation";
 import { LANDING_FORM_IDS } from "@/config/admin-landing-sections";
 import { cn } from "@/lib/utils";
@@ -36,6 +37,12 @@ export function DivisionsEditor() {
   );
   const [activeIdx, setActiveIdx] = useState(0);
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const isDirty = useMemo(
+    () => JSON.stringify(items) !== JSON.stringify(landingContent.divisions),
+    [items, landingContent.divisions]
+  );
+  useDirtyTracker(isDirty, "Section Divisi & Bidang");
 
   const current = items[activeIdx] ?? items[0];
 
@@ -213,6 +220,12 @@ export function ServicesEditor() {
   );
   const [activeIdx, setActiveIdx] = useState(0);
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const isDirty = useMemo(
+    () => JSON.stringify(form) !== JSON.stringify(landingContent.services),
+    [form, landingContent.services]
+  );
+  useDirtyTracker(isDirty, "Section Karya & Portofolio");
 
   const safeIdx = activeIdx < form.tabs.length ? activeIdx : 0;
   const activeTab = form.tabs[safeIdx] ?? form.tabs[0];

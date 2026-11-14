@@ -21,6 +21,10 @@ import {
 import { AdminImageUpload } from "@/components/admin/AdminImageUpload";
 import { InstagramIcon } from "@/components/ui/InstagramIcon";
 import { useAdminCms } from "@/components/admin/AdminCmsProvider";
+import {
+  useDirtyTracker,
+  UnsavedBadge,
+} from "@/components/admin/UnsavedChangesProvider";
 import { mapZodIssues } from "@/components/admin/editors/validation";
 import { cn } from "@/lib/utils";
 
@@ -54,8 +58,47 @@ export default function AdminTeamPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [isHeaderOpen, setIsHeaderOpen] = useState(false);
   const [editingMember, setEditingMember] = useState<TeamMember | null>(null);
+  const [initialMember, setInitialMember] = useState<TeamMember | null>(null);
+  const [confirmDiscardMemberOpen, setConfirmDiscardMemberOpen] = useState(false);
   const [memberToDelete, setMemberToDelete] = useState<TeamMember | null>(null);
   const filterDropdownRef = useRef<HTMLDivElement>(null);
+
+  const isMemberDirty = useMemo(() => {
+    if (!editingMember || !initialMember) return false;
+    return (
+      editingMember.name !== initialMember.name ||
+      editingMember.role !== initialMember.role ||
+      editingMember.divisionId !== initialMember.divisionId ||
+      editingMember.photo !== initialMember.photo ||
+      (editingMember.avatar ?? "") !== (initialMember.avatar ?? "") ||
+      (editingMember.quoteText ?? "") !== (initialMember.quoteText ?? "") ||
+      (editingMember.instagramUrl ?? "") !== (initialMember.instagramUrl ?? "") ||
+      Boolean(editingMember.isLeader) !== Boolean(initialMember.isLeader)
+    );
+  }, [editingMember, initialMember]);
+
+  useDirtyTracker(isMemberDirty, "Data Anggota Tim");
+
+  const handleOpenAddMember = () => {
+    const newMember = { ...EMPTY_MEMBER };
+    setInitialMember(newMember);
+    setEditingMember(newMember);
+  };
+
+  const handleOpenEditMember = (member: TeamMember) => {
+    const copy = { ...member };
+    setInitialMember(copy);
+    setEditingMember(copy);
+  };
+
+  const handleAttemptCloseMember = () => {
+    if (isMemberDirty) {
+      setConfirmDiscardMemberOpen(true);
+    } else {
+      setEditingMember(null);
+      setInitialMember(null);
+    }
+  };
 
   useEffect(() => {
     if (!isFilterOpen) return;
@@ -122,6 +165,7 @@ export default function AdminTeamPage() {
 
     upsertTeamMember(normalized);
     setEditingMember(null);
+    setInitialMember(null);
   };
 
   const divisionFilterChoices: { id: DivisionFilter; label: string; count: number }[] =
@@ -160,7 +204,7 @@ export default function AdminTeamPage() {
             </button>
             <button
               type="button"
-              onClick={() => setEditingMember({ ...EMPTY_MEMBER })}
+              onClick={handleOpenAddMember}
               className="inline-flex items-center gap-2 rounded-full bg-[#185adb] hover:bg-[#1348b5] px-5 py-2.5 text-[14px] font-medium text-white transition-colors cursor-pointer"
             >
               <Plus className="h-4 w-4" />
@@ -322,7 +366,7 @@ export default function AdminTeamPage() {
                 <div className="flex-1 grid grid-cols-2 gap-2.5">
                   <button
                     type="button"
-                    onClick={() => setEditingMember({ ...member })}
+                    onClick={() => handleOpenEditMember(member)}
                     className="w-full inline-flex items-center justify-center gap-1.5 rounded-full border border-zinc-200/90 bg-white hover:bg-zinc-50 px-4 py-2 text-[13px] font-medium text-[#0c0f1d] transition-colors cursor-pointer"
                   >
                     <Pencil className="h-3.5 w-3.5 text-[#185adb]" />
@@ -349,7 +393,7 @@ export default function AdminTeamPage() {
           role="dialog"
           aria-modal="true"
           className="fixed inset-0 z-50 flex items-center justify-center bg-[#0c0f1d]/40 backdrop-blur-[2px] p-4 sm:p-6"
-          onClick={() => setEditingMember(null)}
+          onClick={handleAttemptCloseMember}
         >
           <form
             onSubmit={handleSaveMember}
@@ -358,12 +402,15 @@ export default function AdminTeamPage() {
           >
             {/* Header Modal (Pinned) */}
             <div className="shrink-0 flex items-center justify-between gap-4 px-6 sm:px-8 pt-6 pb-4 border-b border-zinc-200/70">
-              <h3 className="text-[20px] sm:text-[22px] font-semibold tracking-[-0.02em] text-[#0c0f1d]">
-                {editingMember.id ? "Edit Profil Anggota" : "Tambah Anggota Baru"}
-              </h3>
+              <div className="flex flex-wrap items-center gap-2.5">
+                <h3 className="text-[20px] sm:text-[22px] font-semibold tracking-[-0.02em] text-[#0c0f1d]">
+                  {editingMember.id ? "Edit Profil Anggota" : "Tambah Anggota Baru"}
+                </h3>
+                {isMemberDirty && <UnsavedBadge />}
+              </div>
               <button
                 type="button"
-                onClick={() => setEditingMember(null)}
+                onClick={handleAttemptCloseMember}
                 aria-label="Tutup modal anggota"
                 className="flex h-8.5 w-8.5 items-center justify-center rounded-full text-zinc-500 hover:bg-zinc-100 cursor-pointer"
               >
@@ -488,14 +535,18 @@ export default function AdminTeamPage() {
             <div className="shrink-0 flex items-center justify-end gap-3 px-6 sm:px-8 py-4 border-t border-zinc-200/70 bg-white">
               <button
                 type="button"
-                onClick={() => setEditingMember(null)}
+                onClick={handleAttemptCloseMember}
                 className="rounded-full border border-zinc-200/90 bg-white hover:bg-zinc-50 px-5 py-2.5 text-[13.5px] font-medium text-[#0c0f1d] cursor-pointer"
               >
                 Batal
               </button>
               <button
                 type="submit"
-                className="rounded-full bg-[#185adb] hover:bg-[#1348b5] px-6 py-2.5 text-[13.5px] font-medium text-white cursor-pointer"
+                className={cn(
+                  "rounded-full bg-[#185adb] hover:bg-[#1348b5] px-6 py-2.5 text-[13.5px] font-medium text-white cursor-pointer transition-all",
+                  isMemberDirty &&
+                    "shadow-[0_4px_16px_rgba(24,90,219,0.35)] ring-2 ring-[#185adb]/30 font-semibold"
+                )}
               >
                 Simpan Anggota
               </button>
@@ -503,6 +554,19 @@ export default function AdminTeamPage() {
           </form>
         </div>
       )}
+
+      <AdminConfirmModal
+        open={confirmDiscardMemberOpen}
+        title="Buang Perubahan Anggota?"
+        description="Anda telah mengubah data profil anggota ini tetapi belum menyimpannya. Yakin ingin membatalkan dan membuang perubahan?"
+        confirmLabel="Ya, Buang Perubahan"
+        onCancel={() => setConfirmDiscardMemberOpen(false)}
+        onConfirm={() => {
+          setConfirmDiscardMemberOpen(false);
+          setEditingMember(null);
+          setInitialMember(null);
+        }}
+      />
 
       <AdminConfirmModal
         open={Boolean(memberToDelete)}
@@ -544,6 +608,15 @@ function TeamHeaderForm({
   const [headerForm, setHeaderForm] = useState<TeamHeaderValue>(initialHeader);
   const [headerErrors, setHeaderErrors] = useState<Record<string, string>>({});
 
+  const isHeaderDirty = useMemo(
+    () =>
+      headerForm.titleLine1 !== initialHeader.titleLine1 ||
+      headerForm.titleLine2 !== initialHeader.titleLine2 ||
+      headerForm.subtitle !== initialHeader.subtitle,
+    [headerForm, initialHeader]
+  );
+  useDirtyTracker(isHeaderDirty, "Header Halaman Tim");
+
   const handleSaveHeader = (e: React.FormEvent) => {
     e.preventDefault();
     const res = teamPageContentSchema.safeParse(headerForm);
@@ -570,12 +643,19 @@ function TeamHeaderForm({
             Mengatur judul 2 baris dan subjudul pengantar halaman daftar tim.
           </p>
         </div>
-        <button
-          type="submit"
-          className="rounded-full border border-zinc-200/90 bg-white hover:bg-zinc-50 px-5 py-2 text-[13px] font-medium text-[#0c0f1d] transition-colors cursor-pointer self-start sm:self-auto"
-        >
-          Simpan Header Tim
-        </button>
+        <div className="flex items-center gap-2 self-start sm:self-auto">
+          {isHeaderDirty && <UnsavedBadge />}
+          <button
+            type="submit"
+            className={cn(
+              "rounded-full border border-zinc-200/90 bg-white hover:bg-zinc-50 px-5 py-2 text-[13px] font-medium text-[#0c0f1d] transition-colors cursor-pointer",
+              isHeaderDirty &&
+                "border-[#185adb] text-[#185adb] font-semibold bg-[#185adb]/5 shadow-sm"
+            )}
+          >
+            Simpan Header Tim
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">

@@ -14,7 +14,14 @@ export const ACCEPTED_IMAGE_TYPES = [
   "image/webp",
 ] as const;
 
-export const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
+export const ACCEPTED_VIDEO_TYPES = [
+  "video/mp4",
+  "video/webm",
+  "video/quicktime",
+] as const;
+
+export const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB (Gambar)
+export const MAX_VIDEO_SIZE_BYTES = 50 * 1024 * 1024; // 50 MB (Video MP4)
 
 export interface UploadMediaResult {
   url: string;
@@ -76,6 +83,56 @@ export async function uploadMediaBuffer(
   // Mencegah error saat developer belum mengisi API key Cloudinary
   const ext = path.extname(fileName) || ".webp";
   const uniqueId = `${Date.now()}-${crypto.randomBytes(6).toString("hex")}`;
+  const targetFileName = `${uniqueId}${ext}`;
+  const uploadsDir = path.join(process.cwd(), "public", "uploads");
+
+  await fs.mkdir(uploadsDir, { recursive: true });
+  const targetPath = path.join(uploadsDir, targetFileName);
+  await fs.writeFile(targetPath, buffer);
+
+  return {
+    url: `/uploads/${targetFileName}`,
+    publicId: `local:${targetFileName}`,
+  };
+}
+
+/**
+ * Mengunggah berkas buffer video ke Cloudinary (atau local fallback jika belum diatur)
+ */
+export async function uploadVideoBuffer(
+  buffer: Buffer,
+  fileName: string,
+  folder = "creatify/videos"
+): Promise<UploadMediaResult> {
+  if (isCloudinaryActive()) {
+    return new Promise<UploadMediaResult>((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          folder,
+          resource_type: "video",
+        },
+        (error, result) => {
+          if (error || !result) {
+            reject(
+              new Error(
+                error?.message || "Gagal mengunggah video ke Cloudinary."
+              )
+            );
+            return;
+          }
+          resolve({
+            url: result.secure_url,
+            publicId: result.public_id,
+          });
+        }
+      );
+      uploadStream.end(buffer);
+    });
+  }
+
+  // Local Storage Fallback untuk berkas video
+  const ext = path.extname(fileName) || ".mp4";
+  const uniqueId = `video-${Date.now()}-${crypto.randomBytes(6).toString("hex")}`;
   const targetFileName = `${uniqueId}${ext}`;
   const uploadsDir = path.join(process.cwd(), "public", "uploads");
 

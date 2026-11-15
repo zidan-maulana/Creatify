@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   DEFAULT_LANDING_CONTENT,
   LANDING_CONTENT_LIMITS,
@@ -11,7 +11,9 @@ import {
   AdminTextareaField,
 } from "@/components/admin/AdminField";
 import { AdminImageUpload } from "@/components/admin/AdminImageUpload";
+import { AdminVideoUpload } from "@/components/admin/AdminVideoUpload";
 import { useAdminCms } from "@/components/admin/AdminCmsProvider";
+import { useDirtyTracker } from "@/components/admin/UnsavedChangesProvider";
 import { mapZodIssues } from "@/components/admin/editors/validation";
 import { LANDING_FORM_IDS } from "@/config/admin-landing-sections";
 import type { AboutContent, HeroContent, MarqueeContent } from "@/types/cms";
@@ -20,6 +22,12 @@ export function HeroEditor() {
   const { landingContent, updateHero, showToast } = useAdminCms();
   const [form, setForm] = useState<HeroContent>(landingContent.hero);
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const isDirty = useMemo(
+    () => JSON.stringify(form) !== JSON.stringify(landingContent.hero),
+    [form, landingContent.hero]
+  );
+  useDirtyTracker(isDirty, "Section Hero");
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
@@ -125,14 +133,13 @@ export function HeroEditor() {
           </p>
         </div>
 
-        <AdminTextField
+        <AdminVideoUpload
           id="hero-video-url"
-          label="Path / URL Video Showcase (MP4)"
+          label="Sumber Video Showcase Hero"
           value={form.videoUrl}
           onChange={(v) => setForm((p) => ({ ...p, videoUrl: v }))}
           error={errors.videoUrl}
-          placeholder="/videos/showcase.mp4"
-          required
+          defaultValue="/videos/showcase.mp4"
         />
       </div>
     </form>
@@ -147,6 +154,14 @@ export function MarqueeAboutEditor() {
   );
   const [about, setAbout] = useState<AboutContent>(landingContent.about);
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const isDirty = useMemo(
+    () =>
+      JSON.stringify(marquee) !== JSON.stringify(landingContent.marquee) ||
+      JSON.stringify(about) !== JSON.stringify(landingContent.about),
+    [marquee, about, landingContent.marquee, landingContent.about]
+  );
+  useDirtyTracker(isDirty, "Section Tentang & Marquee");
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();

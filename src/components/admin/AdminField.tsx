@@ -3,6 +3,7 @@
 import React, { useEffect } from "react";
 import { Check, AlertCircle, X } from "lucide-react";
 import { countSentences } from "@/config/landing-cms";
+import { UnsavedBadge } from "@/components/admin/UnsavedChangesProvider";
 import { cn } from "@/lib/utils";
 import type { TextFieldLimit } from "@/types/cms";
 import type { AdminToastState } from "@/components/admin/AdminCmsProvider";
@@ -21,9 +22,12 @@ export function AdminSectionHeader({
   return (
     <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 sm:gap-6">
       <div>
-        <h1 className="text-[26px] sm:text-[32px] font-medium tracking-[-0.03em] leading-[1.12] text-[#0c0f1d]">
-          {title}
-        </h1>
+        <div className="flex flex-wrap items-center gap-2.5">
+          <h1 className="text-[26px] sm:text-[32px] font-medium tracking-[-0.03em] leading-[1.12] text-[#0c0f1d]">
+            {title}
+          </h1>
+          <UnsavedBadge />
+        </div>
         <p className="mt-1.5 max-w-2xl text-[14px] sm:text-[14.5px] font-normal leading-[1.6] text-zinc-500">
           {description}
         </p>

@@ -38,7 +38,7 @@ export const TEAM_MEMBERS_DATA: TeamMember[] = [
     role: "Ketua Umum Creatify",
     divisionId: "ketua-wakil",
     avatar:
-      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&crop=face&w=300&h=300&q=80",
+      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&h=1000&q=80",
     photo:
       "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&h=1000&q=80",
     quoteText:
@@ -51,7 +51,7 @@ export const TEAM_MEMBERS_DATA: TeamMember[] = [
     role: "Wakil Ketua Umum Creatify",
     divisionId: "ketua-wakil",
     avatar:
-      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&crop=face&w=300&h=300&q=80",
+      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&h=1000&q=80",
     photo:
       "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&h=1000&q=80",
     quoteText:

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { AdminCmsProvider } from "@/components/admin/AdminCmsProvider";
 import { AdminShell } from "@/components/admin/AdminShell";
+import { UnsavedChangesProvider } from "@/components/admin/UnsavedChangesProvider";
 import { getLandingContent, getTeamPageContent } from "@/lib/cms";
 import { getCurrentAdminSession } from "@/lib/auth";
 
@@ -25,7 +26,9 @@ export default async function AdminDashboardLayout({
       initialTeamContent={teamPageData.content}
       initialAdminEmail={session.email}
     >
-      <AdminShell>{children}</AdminShell>
+      <UnsavedChangesProvider>
+        <AdminShell>{children}</AdminShell>
+      </UnsavedChangesProvider>
     </AdminCmsProvider>
   );
 }

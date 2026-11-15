@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useRef, useState } from "react";
-import { Upload, ImagePlus, RotateCcw } from "lucide-react";
+import React, { useRef, useState, useMemo } from "react";
+import { Upload, ImagePlus, RotateCcw, Crop } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { uploadMediaAction } from "@/actions/media-actions";
+import { ImageCropModal } from "@/components/admin/ImageCropModal";
 
 const ACCEPTED_MIME_TYPES = new Set([
   "image/jpeg",
@@ -26,6 +27,35 @@ interface AdminImageUploadProps {
   required?: boolean;
 }
 
+function parseAspectDetails(aspectClass?: string): { value: number; label: string } {
+  if (!aspectClass) {
+    return { value: 16 / 9, label: "16:9 Landscape" };
+  }
+  if (aspectClass.includes("aspect-square") || aspectClass.includes("aspect-[1/1]")) {
+    return { value: 1, label: "1:1 Persegi" };
+  }
+  if (aspectClass.includes("aspect-[3/4]")) {
+    return { value: 3 / 4, label: "3:4 Potret Tim" };
+  }
+  if (aspectClass.includes("aspect-[4/3]")) {
+    return { value: 4 / 3, label: "4:3 Foto Standard" };
+  }
+  if (aspectClass.includes("aspect-[16/9]")) {
+    return { value: 16 / 9, label: "16:9 Showcase / Banner" };
+  }
+
+  const match = aspectClass.match(/aspect-\[(\d+)\/(\d+)\]/);
+  if (match) {
+    const w = parseFloat(match[1]);
+    const h = parseFloat(match[2]);
+    if (w > 0 && h > 0) {
+      return { value: w / h, label: `${w}:${h}` };
+    }
+  }
+
+  return { value: 16 / 9, label: "Format Standar" };
+}
+
 export function AdminImageUpload({
   id,
   label,
@@ -45,10 +75,25 @@ export function AdminImageUpload({
   const [isProcessing, setIsProcessing] = useState(false);
   const [localError, setLocalError] = useState("");
 
+  // Crop Modal state
+  const [isCropOpen, setIsCropOpen] = useState(false);
+  const [cropSrc, setCropSrc] = useState("");
+  const activeBlobUrlRef = useRef<string | null>(null);
+
   const activeError = localError || error;
   const canRestoreDefault = Boolean(defaultValue && value !== defaultValue);
 
-  const handleFiles = async (files: FileList | null) => {
+  const aspectDetails = useMemo(() => parseAspectDetails(aspectClass), [aspectClass]);
+
+  // Bersihkan URL sementara saat selesai
+  const cleanupBlobUrl = () => {
+    if (activeBlobUrlRef.current && activeBlobUrlRef.current.startsWith("blob:")) {
+      URL.revokeObjectURL(activeBlobUrlRef.current);
+      activeBlobUrlRef.current = null;
+    }
+  };
+
+  const handleFiles = (files: FileList | null) => {
     const file = files?.[0];
     if (!file) return;
 
@@ -64,14 +109,34 @@ export function AdminImageUpload({
       return;
     }
 
+    // Buat URL lokal untuk pratinjau dan buka modal crop interaktif
+    cleanupBlobUrl();
+    const objectUrl = URL.createObjectURL(file);
+    activeBlobUrlRef.current = objectUrl;
+    setCropSrc(objectUrl);
+    setIsCropOpen(true);
+
+    if (inputRef.current) {
+      inputRef.current.value = "";
+    }
+  };
+
+  // Callback saat user selesai menyesuaikan foto di modal crop
+  const handleApplyCroppedImage = async (blob: Blob) => {
     setIsProcessing(true);
+    setLocalError("");
+
     try {
+      const croppedFile = new File([blob], `cropped-${Date.now()}.webp`, {
+        type: "image/webp",
+      });
+
       const formData = new FormData();
-      formData.append("file", file);
+      formData.append("file", croppedFile);
 
       const res = await uploadMediaAction(formData);
       if (!res.success) {
-        setLocalError(res.error.message || "Gagal mengunggah gambar.");
+        setLocalError(res.error.message || "Gagal mengunggah gambar hasil crop.");
         return;
       }
 
@@ -82,25 +147,44 @@ export function AdminImageUpload({
       );
     } finally {
       setIsProcessing(false);
-      if (inputRef.current) {
-        inputRef.current.value = "";
-      }
+      cleanupBlobUrl();
     }
   };
 
-  const changeButton = (
-    <button
-      type="button"
-      disabled={isProcessing}
-      onClick={() => inputRef.current?.click()}
-      className={cn(
-        "inline-flex items-center gap-1.5 rounded-[12px] border border-zinc-200/90 bg-white hover:bg-zinc-50 py-1.5 text-[12px] font-medium text-[#0c0f1d] transition-colors cursor-pointer disabled:opacity-60",
-        compactActions ? "w-full justify-center px-3" : "px-3.5"
+  // Tombol aksi ganti & sesuaikan
+  const actionButtons = (
+    <div className={cn("flex items-center gap-1.5", compactActions ? "w-full flex-col" : "flex-wrap")}>
+      <button
+        type="button"
+        disabled={isProcessing}
+        onClick={() => inputRef.current?.click()}
+        className={cn(
+          "inline-flex items-center gap-1.5 rounded-[12px] border border-zinc-200/90 bg-white hover:bg-zinc-50 py-1.5 text-[12px] font-medium text-[#0c0f1d] transition-colors cursor-pointer disabled:opacity-60",
+          compactActions ? "w-full justify-center px-3" : "px-3"
+        )}
+      >
+        <Upload className="h-3.5 w-3.5 text-[#185adb]" />
+        <span>{isProcessing ? "Memproses..." : "Ganti Gambar"}</span>
+      </button>
+
+      {value && (
+        <button
+          type="button"
+          disabled={isProcessing}
+          onClick={() => {
+            setCropSrc(value);
+            setIsCropOpen(true);
+          }}
+          className={cn(
+            "inline-flex items-center gap-1.5 rounded-[12px] border border-zinc-200/90 bg-white hover:bg-zinc-50 py-1.5 text-[12px] font-medium text-[#0c0f1d] transition-colors cursor-pointer disabled:opacity-60",
+            compactActions ? "w-full justify-center px-3" : "px-3"
+          )}
+        >
+          <Crop className="h-3.5 w-3.5 text-[#185adb]" />
+          <span>Sesuaikan Posisi</span>
+        </button>
       )}
-    >
-      <Upload className="h-3.5 w-3.5 text-[#185adb]" />
-      <span>{isProcessing ? "Memproses..." : "Ganti Gambar"}</span>
-    </button>
+    </div>
   );
 
   return (
@@ -182,6 +266,7 @@ export function AdminImageUpload({
                 compactActions && "sm:aspect-auto sm:flex-1 sm:min-h-[160px]"
               )}
             >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={value}
                 alt={label}
@@ -195,7 +280,7 @@ export function AdminImageUpload({
 
             {compactActions ? (
               <div className="space-y-1.5 pt-0.5 shrink-0">
-                {changeButton}
+                {actionButtons}
                 <span className="block text-center text-[10.5px] leading-tight text-zinc-500">
                   {helperText}
                 </span>
@@ -203,7 +288,7 @@ export function AdminImageUpload({
             ) : (
               <div className="flex flex-wrap items-center justify-between gap-2 px-1">
                 <span className="text-[11.5px] text-zinc-500">{helperText}</span>
-                {changeButton}
+                {actionButtons}
               </div>
             )}
           </div>
@@ -236,7 +321,22 @@ export function AdminImageUpload({
       {activeError && (
         <p className="mt-1.5 text-[12px] text-red-500">{activeError}</p>
       )}
+
+      {/* Modal Crop & Sesuaikan Posisi (TikTok Style) */}
+      {isCropOpen && (
+        <ImageCropModal
+          key={cropSrc}
+          isOpen={isCropOpen}
+          onClose={() => {
+            setIsCropOpen(false);
+            cleanupBlobUrl();
+          }}
+          imageSrc={cropSrc}
+          aspectRatioValue={aspectDetails.value}
+          aspectRatioLabel={aspectDetails.label}
+          onApply={handleApplyCroppedImage}
+        />
+      )}
     </div>
   );
 }
-

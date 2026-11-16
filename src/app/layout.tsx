@@ -1,8 +1,13 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { SmoothScroll } from "@/components/providers/SmoothScroll";
 import { getSiteSettings } from "@/lib/cms";
+
+export const viewport: Viewport = {
+  themeColor: "#ffffff",
+  colorScheme: "light",
+};
 
 const bricolageGrotesque = localFont({
   src: "./fonts/bricolage-grotesque-latin.woff2",

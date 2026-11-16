@@ -156,26 +156,30 @@ export function HeroSection({
         lastScale = scale;
       }
 
-      // Transisi dinamis stage biru <-> putih: aktif saat video berada di tengah viewport
-      const triggerThreshold = windowHeight * 0.7;
-      const hysteresisThreshold = windowHeight * 0.75;
+      // 2. Transisi warna background dari biru ke putih yang mulus dan terikat langsung ke scroll
+      const colorStart = windowHeight * 0.95;
+      const colorEnd = windowHeight * 0.35;
+      const colorProgress = Math.min(
+        Math.max((colorStart - rect.bottom) / (colorStart - colorEnd), 0),
+        1
+      );
+      const blueOpacity = Number((1 - colorProgress).toFixed(3));
 
-      let nextIsWhiteStage = lastWhiteStage ?? false;
-      if (rect.bottom <= triggerThreshold) {
-        nextIsWhiteStage = true;
-      } else if (rect.bottom > hysteresisThreshold) {
-        nextIsWhiteStage = false;
+      const stageBlueLayer = document.getElementById("stage-blue-layer");
+      if (stageBlueLayer) {
+        stageBlueLayer.style.opacity = String(blueOpacity);
+      }
+      if (glowRef.current) {
+        glowRef.current.style.opacity = String(blueOpacity);
       }
 
-      if (nextIsWhiteStage !== lastWhiteStage) {
+      const isWhite = blueOpacity < 0.2;
+      if (isWhite !== lastWhiteStage) {
         const canvas = document.getElementById("landing-canvas");
         if (canvas) {
-          canvas.dataset.stage = nextIsWhiteStage ? "light" : "blue";
+          canvas.dataset.stage = isWhite ? "light" : "blue";
         }
-        if (glowRef.current) {
-          glowRef.current.style.opacity = nextIsWhiteStage ? "0" : "1";
-        }
-        lastWhiteStage = nextIsWhiteStage;
+        lastWhiteStage = isWhite;
       }
 
       // Perbarui status navbar & active scroll spy hanya jika berubah
@@ -252,7 +256,7 @@ export function HeroSection({
       <div
         ref={glowRef}
         style={{ willChange: "opacity" }}
-        className="pointer-events-none absolute inset-0 z-0 overflow-hidden transition-opacity duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
+        className="pointer-events-none absolute inset-0 z-0 overflow-hidden"
       >
         <div className="absolute -top-24 -left-24 sm:-top-32 sm:-left-32 h-[320px] w-[320px] sm:h-[580px] sm:w-[580px] rounded-full bg-[#5293ff]/30 blur-[100px] sm:blur-[130px]" />
         <div className="absolute -top-24 -right-24 sm:-top-32 sm:-right-32 h-[320px] w-[320px] sm:h-[580px] sm:w-[580px] rounded-full bg-[#5293ff]/30 blur-[100px] sm:blur-[130px]" />

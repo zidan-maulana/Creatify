@@ -20,7 +20,7 @@ export function AboutSection({
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-8 lg:gap-12 xl:gap-16 items-start lg:items-stretch">
           {/* Kolom kiri: Editorial headline dengan visual image pills */}
           <ScrollReveal duration={880} distance={30} className="lg:col-span-7 xl:col-span-7">
-            <h2 className="block sm:flex sm:flex-col sm:gap-1.5 text-[23px] min-[400px]:text-[25px] sm:text-[30px] md:text-[34px] lg:text-[40px] xl:text-[43px] font-medium tracking-[-0.025em] stage-fg stage-sync leading-[1.32] sm:leading-[1.18] text-left">
+            <h2 className="block sm:flex sm:flex-col sm:gap-1.5 text-[23px] min-[400px]:text-[25px] sm:text-[30px] md:text-[34px] lg:text-[40px] xl:text-[43px] font-medium tracking-[-0.025em] text-[#0c0f1d] leading-[1.32] sm:leading-[1.18] text-left">
               <span className="inline sm:block">
                 <span>{content.headlineLine1Before} </span>
                 <span
@@ -72,7 +72,7 @@ export function AboutSection({
             distance={26}
             className="lg:col-span-5 xl:col-span-5 pt-0.5 lg:pb-2 flex flex-col justify-between gap-5 sm:gap-4 text-[14.5px] sm:text-[15px] font-normal leading-[1.65] w-full text-left"
           >
-            <p className="stage-muted stage-sync">{content.description}</p>
+            <p className="text-zinc-600 sm:text-zinc-700">{content.description}</p>
 
             {/* Tombol menuju halaman tim */}
             <div className="pt-0 lg:-translate-y-0.5">

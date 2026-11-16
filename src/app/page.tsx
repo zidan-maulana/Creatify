@@ -15,12 +15,15 @@ export default async function Home() {
       data-stage="blue"
       className="relative min-h-screen w-full bg-white text-zinc-950 overflow-x-hidden"
     >
-      {/* GPU-Accelerated Dynamic Cobalt Blue Stage Layer */}
+      {/* GPU-Accelerated Dynamic Cobalt Blue Stage Layer (Scroll-Driven) */}
       <div
         id="stage-blue-layer"
         aria-hidden="true"
-        className="pointer-events-none fixed inset-0 z-0 bg-[#185adb] transition-opacity duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
-        style={{ willChange: "opacity" }}
+        className="pointer-events-none fixed inset-0 z-0 bg-[#185adb] [transform:translateZ(0)]"
+        style={{
+          opacity: 1,
+          willChange: "opacity",
+        }}
       />
 
       <div className="relative z-10">

@@ -125,22 +125,9 @@ export function HeroSection({
   useEffect(() => {
     let ticking = false;
     let lastScale = -1;
-    let lastWhiteStage: boolean | null = null;
     let lastScrolled: boolean | null = null;
     let lastActive = "";
     let scrollRafId: number | null = null;
-    let outerRafId: number | null = null;
-    let innerRafId: number | null = null;
-
-    const prefersReducedMotion = window.matchMedia(
-      "(prefers-reduced-motion: reduce)"
-    ).matches;
-    const colorTransition = prefersReducedMotion
-      ? "none"
-      : "background-color 500ms cubic-bezier(0.4, 0, 0.2, 1)";
-    const opacityTransition = prefersReducedMotion
-      ? "none"
-      : "opacity 500ms cubic-bezier(0.4, 0, 0.2, 1)";
 
     const updateParallax = () => {
       if (!videoContainerRef.current || !videoFrameRef.current) {
@@ -152,9 +139,9 @@ export function HeroSection({
       const windowHeight = window.innerHeight;
 
       const isMobileViewport = window.innerWidth < 768;
-      const minScale = isMobileViewport ? 1 : 0.7;
+      const minScale = isMobileViewport ? 0.93 : 0.7;
 
-      // Skala frame video berdasarkan posisi scroll (1.0 pada mobile, 0.70-1.0 pada desktop)
+      // Skala frame video berdasarkan posisi scroll (0.93-1.0 pada mobile, 0.70-1.0 pada desktop)
       const start = windowHeight;
       const end = 60;
       const progress = Math.min(Math.max((start - rect.top) / (start - end), 0), 1);
@@ -168,30 +155,17 @@ export function HeroSection({
         lastScale = scale;
       }
 
-      // Transisi mulus biru <-> putih dimulai ketika card video hampir selesai terlewati
-      const triggerBottom = Math.min(windowHeight * 0.4, rect.height * 0.36);
-      const nextIsWhiteStage = rect.bottom <= triggerBottom;
-      if (nextIsWhiteStage !== lastWhiteStage) {
-        const nextBgColor = nextIsWhiteStage ? "#ffffff" : "#185adb";
-        const canvas = document.getElementById("landing-canvas");
-        if (canvas) {
-          canvas.dataset.stage = nextIsWhiteStage ? "light" : "blue";
-          canvas.style.backgroundColor = nextBgColor;
-        }
-        document.body.style.backgroundColor = nextBgColor;
-
-        if (glowRef.current) {
-          glowRef.current.style.opacity = nextIsWhiteStage ? "0" : "1";
-        }
-        lastWhiteStage = nextIsWhiteStage;
-      }
-
       // Perbarui status navbar & active scroll spy hanya jika berubah
       const scrollY = window.scrollY;
       const nextScrolled = scrollY > 20;
       if (nextScrolled !== lastScrolled) {
         setIsScrolled(nextScrolled);
         lastScrolled = nextScrolled;
+      }
+
+      if (glowRef.current) {
+        const glowOpacity = Math.max(0, 1 - scrollY / (windowHeight * 0.75));
+        glowRef.current.style.opacity = glowOpacity.toFixed(2);
       }
 
       const tentangEl = document.getElementById("tentang");
@@ -241,34 +215,10 @@ export function HeroSection({
     window.addEventListener("resize", onScroll, { passive: true });
     updateParallax();
 
-    // Aktifkan transisi CSS setelah frame awal agar posisi scroll langsung akurat tanpa kedipan
-    outerRafId = window.requestAnimationFrame(() => {
-      innerRafId = window.requestAnimationFrame(() => {
-        const canvas = document.getElementById("landing-canvas");
-        if (canvas) {
-          canvas.style.transition = colorTransition;
-          canvas.dataset.stageReady = "true";
-        }
-        document.body.style.transition = colorTransition;
-        if (glowRef.current) {
-          glowRef.current.style.transition = opacityTransition;
-        }
-      });
-    });
-
     return () => {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
       if (scrollRafId !== null) window.cancelAnimationFrame(scrollRafId);
-      if (outerRafId !== null) window.cancelAnimationFrame(outerRafId);
-      if (innerRafId !== null) window.cancelAnimationFrame(innerRafId);
-      const canvas = document.getElementById("landing-canvas");
-      if (canvas) {
-        canvas.style.transition = "";
-        delete canvas.dataset.stageReady;
-      }
-      document.body.style.transition = "";
-      document.body.style.backgroundColor = "";
     };
   }, []);
 
@@ -280,15 +230,23 @@ export function HeroSection({
       }}
       className="relative w-full overflow-hidden text-white flex flex-col selection:bg-[#1655dc] selection:text-white pb-6 sm:pb-8"
     >
-      {/* Background ambient lighting */}
+      {/* Background ambient lighting & seamless blue-to-white stage transition */}
       <div
-        ref={glowRef}
-        style={{ willChange: "opacity" }}
         className="pointer-events-none absolute inset-0 z-0 overflow-hidden"
+        style={{
+          background:
+            "linear-gradient(180deg, #185adb 0%, #185adb 70%, #185adb 82%, rgba(24, 90, 219, 0.45) 94%, #ffffff 100%)",
+        }}
       >
-        <div className="absolute -top-24 -left-24 sm:-top-32 sm:-left-32 h-[320px] w-[320px] sm:h-[580px] sm:w-[580px] rounded-full bg-[#5293ff]/30 blur-[100px] sm:blur-[130px]" />
-        <div className="absolute -top-24 -right-24 sm:-top-32 sm:-right-32 h-[320px] w-[320px] sm:h-[580px] sm:w-[580px] rounded-full bg-[#5293ff]/30 blur-[100px] sm:blur-[130px]" />
-        <div className="absolute top-[28%] sm:top-[32%] left-1/2 -translate-x-1/2 -translate-y-1/2 h-[360px] w-[420px] sm:h-[650px] sm:w-[850px] rounded-full bg-[#3078ff]/25 blur-[110px] sm:blur-[150px]" />
+        <div
+          ref={glowRef}
+          style={{ willChange: "opacity" }}
+          className="absolute inset-0"
+        >
+          <div className="absolute -top-24 -left-24 sm:-top-32 sm:-left-32 h-[320px] w-[320px] sm:h-[580px] sm:w-[580px] rounded-full bg-[#5293ff]/30 blur-[100px] sm:blur-[130px]" />
+          <div className="absolute -top-24 -right-24 sm:-top-32 sm:-right-32 h-[320px] w-[320px] sm:h-[580px] sm:w-[580px] rounded-full bg-[#5293ff]/30 blur-[100px] sm:blur-[130px]" />
+          <div className="absolute top-[28%] sm:top-[32%] left-1/2 -translate-x-1/2 -translate-y-1/2 h-[360px] w-[420px] sm:h-[650px] sm:w-[850px] rounded-full bg-[#3078ff]/25 blur-[110px] sm:blur-[150px]" />
+        </div>
       </div>
 
       {/* Floating navigation bar */}
@@ -431,7 +389,7 @@ export function HeroSection({
               willChange: "transform",
               transformOrigin: "center top",
             }}
-            className="group relative [--hero-video-scale:1] md:[--hero-video-scale:0.7] w-full max-w-[360px] sm:max-w-[440px] md:max-w-[97vw] aspect-[9/14] sm:aspect-[3/4] md:aspect-video overflow-hidden rounded-[26px] sm:rounded-[36px] md:rounded-[54px] bg-zinc-950/90 [transform:translateZ(0)] isolate cursor-pointer md:cursor-default"
+            className="group relative [--hero-video-scale:0.93] md:[--hero-video-scale:0.7] w-full max-w-[360px] sm:max-w-[440px] md:max-w-[97vw] aspect-[9/14] sm:aspect-[3/4] md:aspect-video overflow-hidden rounded-[26px] sm:rounded-[36px] md:rounded-[54px] bg-zinc-950/90 [transform:translateZ(0)] isolate cursor-pointer md:cursor-default"
           >
             {/* Autoplaying Showcase Video: Hybrid Support (YouTube / Vimeo / MP4) */}
             {sanitizedVideo ? (

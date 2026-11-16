@@ -209,10 +209,9 @@ export function PublicNavbar({
           ref={navRef}
           aria-label="Navigasi utama"
           className={cn(
-            "relative flex flex-col md:flex-row md:items-center md:gap-7 md:rounded-full bg-white md:bg-white/95 px-3.5 py-2.5 md:pl-3.5 md:pr-2.5 md:py-2.5 md:backdrop-blur-md transition-[box-shadow,border-color,background-color] duration-300",
-            mobileMenuOpen ? "rounded-[30px]" : "rounded-full",
+            "relative flex flex-col md:flex-row md:items-center md:gap-7 rounded-[28px] md:rounded-full bg-white md:bg-white/95 px-3.5 py-2.5 md:pl-3.5 md:pr-2.5 md:py-2.5 md:backdrop-blur-md transition-all duration-300",
             navBorderAndShadow,
-            mobileMenuOpen && "bg-white shadow-[0_20px_50px_rgba(12,15,29,0.18)]"
+            mobileMenuOpen && "shadow-[0_20px_50px_rgba(12,15,29,0.18)]"
           )}
         >
           {/* Baris utama pill navbar */}
@@ -276,7 +275,7 @@ export function PublicNavbar({
             )}
           </div>
 
-          {/* Panel dropdown mobile menyatu dengan animasi ekspansi halus */}
+          {/* Panel dropdown mobile menyatu dengan animasi ekspansi halus tanpa terpental */}
           <div
             aria-hidden={!mobileMenuOpen}
             className={cn(
@@ -289,8 +288,8 @@ export function PublicNavbar({
             <div className="overflow-hidden">
               <div
                 className={cn(
-                  "pt-2.5 pb-1 flex flex-col text-zinc-900 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]",
-                  mobileMenuOpen ? "translate-y-0" : "-translate-y-2"
+                  "pt-2.5 pb-1 flex flex-col text-zinc-900 transition-opacity duration-200",
+                  mobileMenuOpen ? "opacity-100" : "opacity-0"
                 )}
               >
                 <div className="px-2 flex flex-col divide-y divide-zinc-200/75">

@@ -12,11 +12,7 @@ export default async function Home() {
   return (
     <main
       id="landing-canvas"
-      data-stage="blue"
-      style={{
-        backgroundColor: "#185adb",
-      }}
-      className="min-h-screen w-full text-zinc-950"
+      className="min-h-screen w-full bg-white text-zinc-950"
     >
       {/* Hero section & video parallax */}
       <HeroSection content={content.hero} siteSettings={content.siteSettings} />

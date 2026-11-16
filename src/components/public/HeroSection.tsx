@@ -125,6 +125,7 @@ export function HeroSection({
   useEffect(() => {
     let ticking = false;
     let lastScale = -1;
+    let lastWhiteStage: boolean | null = null;
     let lastScrolled: boolean | null = null;
     let lastActive = "";
     let scrollRafId: number | null = null;
@@ -155,17 +156,34 @@ export function HeroSection({
         lastScale = scale;
       }
 
+      // Transisi dinamis stage biru <-> putih: aktif saat video berada di tengah viewport
+      const triggerThreshold = windowHeight * 0.7;
+      const hysteresisThreshold = windowHeight * 0.75;
+
+      let nextIsWhiteStage = lastWhiteStage ?? false;
+      if (rect.bottom <= triggerThreshold) {
+        nextIsWhiteStage = true;
+      } else if (rect.bottom > hysteresisThreshold) {
+        nextIsWhiteStage = false;
+      }
+
+      if (nextIsWhiteStage !== lastWhiteStage) {
+        const canvas = document.getElementById("landing-canvas");
+        if (canvas) {
+          canvas.dataset.stage = nextIsWhiteStage ? "light" : "blue";
+        }
+        if (glowRef.current) {
+          glowRef.current.style.opacity = nextIsWhiteStage ? "0" : "1";
+        }
+        lastWhiteStage = nextIsWhiteStage;
+      }
+
       // Perbarui status navbar & active scroll spy hanya jika berubah
       const scrollY = window.scrollY;
       const nextScrolled = scrollY > 20;
       if (nextScrolled !== lastScrolled) {
         setIsScrolled(nextScrolled);
         lastScrolled = nextScrolled;
-      }
-
-      if (glowRef.current) {
-        const glowOpacity = Math.max(0, 1 - scrollY / (windowHeight * 0.75));
-        glowRef.current.style.opacity = glowOpacity.toFixed(2);
       }
 
       const tentangEl = document.getElementById("tentang");
@@ -230,23 +248,15 @@ export function HeroSection({
       }}
       className="relative w-full overflow-hidden text-white flex flex-col selection:bg-[#1655dc] selection:text-white pb-6 sm:pb-8"
     >
-      {/* Background ambient lighting & seamless blue-to-white stage transition */}
+      {/* Background ambient lighting */}
       <div
-        className="pointer-events-none absolute inset-0 z-0 overflow-hidden"
-        style={{
-          background:
-            "linear-gradient(180deg, #185adb 0%, #185adb 70%, #185adb 82%, rgba(24, 90, 219, 0.45) 94%, #ffffff 100%)",
-        }}
+        ref={glowRef}
+        style={{ willChange: "opacity" }}
+        className="pointer-events-none absolute inset-0 z-0 overflow-hidden transition-opacity duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
       >
-        <div
-          ref={glowRef}
-          style={{ willChange: "opacity" }}
-          className="absolute inset-0"
-        >
-          <div className="absolute -top-24 -left-24 sm:-top-32 sm:-left-32 h-[320px] w-[320px] sm:h-[580px] sm:w-[580px] rounded-full bg-[#5293ff]/30 blur-[100px] sm:blur-[130px]" />
-          <div className="absolute -top-24 -right-24 sm:-top-32 sm:-right-32 h-[320px] w-[320px] sm:h-[580px] sm:w-[580px] rounded-full bg-[#5293ff]/30 blur-[100px] sm:blur-[130px]" />
-          <div className="absolute top-[28%] sm:top-[32%] left-1/2 -translate-x-1/2 -translate-y-1/2 h-[360px] w-[420px] sm:h-[650px] sm:w-[850px] rounded-full bg-[#3078ff]/25 blur-[110px] sm:blur-[150px]" />
-        </div>
+        <div className="absolute -top-24 -left-24 sm:-top-32 sm:-left-32 h-[320px] w-[320px] sm:h-[580px] sm:w-[580px] rounded-full bg-[#5293ff]/30 blur-[100px] sm:blur-[130px]" />
+        <div className="absolute -top-24 -right-24 sm:-top-32 sm:-right-32 h-[320px] w-[320px] sm:h-[580px] sm:w-[580px] rounded-full bg-[#5293ff]/30 blur-[100px] sm:blur-[130px]" />
+        <div className="absolute top-[28%] sm:top-[32%] left-1/2 -translate-x-1/2 -translate-y-1/2 h-[360px] w-[420px] sm:h-[650px] sm:w-[850px] rounded-full bg-[#3078ff]/25 blur-[110px] sm:blur-[150px]" />
       </div>
 
       {/* Floating navigation bar */}

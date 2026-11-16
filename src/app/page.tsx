@@ -12,28 +12,39 @@ export default async function Home() {
   return (
     <main
       id="landing-canvas"
-      className="min-h-screen w-full bg-white text-zinc-950"
+      data-stage="blue"
+      className="relative min-h-screen w-full bg-white text-zinc-950 overflow-x-hidden"
     >
-      {/* Hero section & video parallax */}
-      <HeroSection content={content.hero} siteSettings={content.siteSettings} />
-
-      {/* About section & akses tim */}
-      <AboutSection content={content.about} />
-
-      {/* Portofolio divisi kreatif */}
-      <PortfolioSection items={content.divisions} />
-
-      {/* Layanan & showcase karya */}
-      <ServicesSection content={content.services} />
-
-      {/* FAQ tanya jawab Creatify */}
-      <FaqSection content={content.faq} siteSettings={content.siteSettings} />
-
-      {/* Section rekrutmen, kontak & footer */}
-      <ContactSection
-        content={content.contact}
-        siteSettings={content.siteSettings}
+      {/* GPU-Accelerated Dynamic Cobalt Blue Stage Layer */}
+      <div
+        id="stage-blue-layer"
+        aria-hidden="true"
+        className="pointer-events-none fixed inset-0 z-0 bg-[#185adb] transition-opacity duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
+        style={{ willChange: "opacity" }}
       />
+
+      <div className="relative z-10">
+        {/* Hero section & video parallax */}
+        <HeroSection content={content.hero} siteSettings={content.siteSettings} />
+
+        {/* About section & akses tim */}
+        <AboutSection content={content.about} />
+
+        {/* Portofolio divisi kreatif */}
+        <PortfolioSection items={content.divisions} />
+
+        {/* Layanan & showcase karya */}
+        <ServicesSection content={content.services} />
+
+        {/* FAQ tanya jawab Creatify */}
+        <FaqSection content={content.faq} siteSettings={content.siteSettings} />
+
+        {/* Section rekrutmen, kontak & footer */}
+        <ContactSection
+          content={content.contact}
+          siteSettings={content.siteSettings}
+        />
+      </div>
     </main>
   );
 }

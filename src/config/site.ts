@@ -1,6 +1,6 @@
 export const SITE_CONFIG = {
   name: "Creatify",
-  title: "Creatify — Digital Portfolio & Creative Team",
+  title: "Creatify Community",
   description:
     "Tim kreatif resmi pendukung branding dan komunikasi visual Fakultas Ilmu Komputer Universitas Mercu Buana.",
   email: "creatify@cs.university.ac.id",

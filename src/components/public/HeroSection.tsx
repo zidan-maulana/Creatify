@@ -129,6 +129,18 @@ export function HeroSection({
     let lastScrolled: boolean | null = null;
     let lastActive = "";
     let scrollRafId: number | null = null;
+    let outerRafId: number | null = null;
+    let innerRafId: number | null = null;
+
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+    const colorTransition = prefersReducedMotion
+      ? "none"
+      : "background-color 500ms cubic-bezier(0.4, 0, 0.2, 1)";
+    const opacityTransition = prefersReducedMotion
+      ? "none"
+      : "opacity 500ms cubic-bezier(0.4, 0, 0.2, 1)";
 
     const updateParallax = () => {
       if (!videoContainerRef.current || !videoFrameRef.current) {
@@ -140,9 +152,9 @@ export function HeroSection({
       const windowHeight = window.innerHeight;
 
       const isMobileViewport = window.innerWidth < 768;
-      const minScale = isMobileViewport ? 0.93 : 0.7;
+      const minScale = isMobileViewport ? 1 : 0.7;
 
-      // Skala frame video berdasarkan posisi scroll (0.93-1.0 pada mobile, 0.70-1.0 pada desktop)
+      // Skala frame video berdasarkan posisi scroll (1.0 pada mobile, 0.70-1.0 pada desktop)
       const start = windowHeight;
       const end = 60;
       const progress = Math.min(Math.max((start - rect.top) / (start - end), 0), 1);
@@ -156,30 +168,22 @@ export function HeroSection({
         lastScale = scale;
       }
 
-      // 2. Transisi warna background dari biru ke putih yang mulus dan terikat langsung ke scroll
-      const colorStart = windowHeight * 0.95;
-      const colorEnd = windowHeight * 0.35;
-      const colorProgress = Math.min(
-        Math.max((colorStart - rect.bottom) / (colorStart - colorEnd), 0),
-        1
-      );
-      const blueOpacity = Number((1 - colorProgress).toFixed(3));
-
-      const stageBlueLayer = document.getElementById("stage-blue-layer");
-      if (stageBlueLayer) {
-        stageBlueLayer.style.opacity = String(blueOpacity);
-      }
-      if (glowRef.current) {
-        glowRef.current.style.opacity = String(blueOpacity);
-      }
-
-      const isWhite = blueOpacity < 0.2;
-      if (isWhite !== lastWhiteStage) {
+      // Transisi mulus biru <-> putih dimulai ketika card video hampir selesai terlewati
+      const triggerBottom = Math.min(windowHeight * 0.4, rect.height * 0.36);
+      const nextIsWhiteStage = rect.bottom <= triggerBottom;
+      if (nextIsWhiteStage !== lastWhiteStage) {
+        const nextBgColor = nextIsWhiteStage ? "#ffffff" : "#185adb";
         const canvas = document.getElementById("landing-canvas");
         if (canvas) {
-          canvas.dataset.stage = isWhite ? "light" : "blue";
+          canvas.dataset.stage = nextIsWhiteStage ? "light" : "blue";
+          canvas.style.backgroundColor = nextBgColor;
         }
-        lastWhiteStage = isWhite;
+        document.body.style.backgroundColor = nextBgColor;
+
+        if (glowRef.current) {
+          glowRef.current.style.opacity = nextIsWhiteStage ? "0" : "1";
+        }
+        lastWhiteStage = nextIsWhiteStage;
       }
 
       // Perbarui status navbar & active scroll spy hanya jika berubah
@@ -237,10 +241,34 @@ export function HeroSection({
     window.addEventListener("resize", onScroll, { passive: true });
     updateParallax();
 
+    // Aktifkan transisi CSS setelah frame awal agar posisi scroll langsung akurat tanpa kedipan
+    outerRafId = window.requestAnimationFrame(() => {
+      innerRafId = window.requestAnimationFrame(() => {
+        const canvas = document.getElementById("landing-canvas");
+        if (canvas) {
+          canvas.style.transition = colorTransition;
+          canvas.dataset.stageReady = "true";
+        }
+        document.body.style.transition = colorTransition;
+        if (glowRef.current) {
+          glowRef.current.style.transition = opacityTransition;
+        }
+      });
+    });
+
     return () => {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
       if (scrollRafId !== null) window.cancelAnimationFrame(scrollRafId);
+      if (outerRafId !== null) window.cancelAnimationFrame(outerRafId);
+      if (innerRafId !== null) window.cancelAnimationFrame(innerRafId);
+      const canvas = document.getElementById("landing-canvas");
+      if (canvas) {
+        canvas.style.transition = "";
+        delete canvas.dataset.stageReady;
+      }
+      document.body.style.transition = "";
+      document.body.style.backgroundColor = "";
     };
   }, []);
 
@@ -403,7 +431,7 @@ export function HeroSection({
               willChange: "transform",
               transformOrigin: "center top",
             }}
-            className="group relative [--hero-video-scale:0.93] md:[--hero-video-scale:0.7] w-full max-w-[360px] sm:max-w-[440px] md:max-w-[97vw] aspect-[9/14] sm:aspect-[3/4] md:aspect-video overflow-hidden rounded-[26px] sm:rounded-[36px] md:rounded-[54px] bg-zinc-950/90 [transform:translateZ(0)] isolate cursor-pointer md:cursor-default"
+            className="group relative [--hero-video-scale:1] md:[--hero-video-scale:0.7] w-full max-w-[360px] sm:max-w-[440px] md:max-w-[97vw] aspect-[9/14] sm:aspect-[3/4] md:aspect-video overflow-hidden rounded-[26px] sm:rounded-[36px] md:rounded-[54px] bg-zinc-950/90 [transform:translateZ(0)] isolate cursor-pointer md:cursor-default"
           >
             {/* Autoplaying Showcase Video: Hybrid Support (YouTube / Vimeo / MP4) */}
             {sanitizedVideo ? (

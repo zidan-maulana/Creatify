@@ -26,8 +26,8 @@ interface SharedObserverEntry {
   callbacks: Map<Element, RevealCallback>;
 }
 
-const DEFAULT_ROOT_MARGIN = "0px 0px -15px 0px";
-const DEFAULT_THRESHOLD = 0.02;
+const DEFAULT_ROOT_MARGIN = "0px 0px -24px 0px";
+const DEFAULT_THRESHOLD = 0.04;
 let sharedObserver: SharedObserverEntry | null = null;
 
 function revealElement(el: HTMLElement) {
@@ -41,7 +41,7 @@ function getSharedObserver(): SharedObserverEntry {
   const observer = new IntersectionObserver(
     (entries) => {
       for (const entry of entries) {
-        if (!entry.isIntersecting && entry.boundingClientRect.top >= window.innerHeight) {
+        if (!entry.isIntersecting && entry.boundingClientRect.bottom >= 0) {
           continue;
         }
         const callback = callbacks.get(entry.target);
@@ -53,7 +53,7 @@ function getSharedObserver(): SharedObserverEntry {
       }
     },
     {
-      threshold: [0, DEFAULT_THRESHOLD],
+      threshold: DEFAULT_THRESHOLD,
       rootMargin: DEFAULT_ROOT_MARGIN,
     }
   );
@@ -71,13 +71,10 @@ function observeRevealTarget(el: HTMLElement, onReveal: RevealCallback): () => v
     return () => undefined;
   }
 
-  // Reveal immediately ONLY if already scrolled past on initial load (e.g. hash links where element is above viewport)
-  if (typeof window !== "undefined" && window.scrollY > 80) {
-    const rect = el.getBoundingClientRect();
-    if (rect.bottom < 0) {
-      onReveal();
-      return () => undefined;
-    }
+  // Reveal immediately if already scrolled past on initial load (e.g. hash links)
+  if (el.getBoundingClientRect().top < window.innerHeight * 0.96) {
+    const rafId = window.requestAnimationFrame(onReveal);
+    return () => window.cancelAnimationFrame(rafId);
   }
 
   const entry = getSharedObserver();

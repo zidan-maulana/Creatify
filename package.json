@@ -10,7 +10,8 @@
     "lint:fix": "eslint --fix",
     "type-check": "tsc --noEmit",
     "db:seed": "prisma db seed",
-    "admin:reset": "tsx scripts/reset-admin.ts"
+    "admin:reset": "tsx scripts/reset-admin.ts",
+    "postinstall": "prisma generate"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

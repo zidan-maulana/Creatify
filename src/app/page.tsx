@@ -1,5 +1,4 @@
 import { HeroSection } from "@/components/public/HeroSection";
-import { LogoMarquee } from "@/components/public/LogoMarquee";
 import { AboutSection } from "@/components/public/AboutSection";
 import { PortfolioSection } from "@/components/public/PortfolioSection";
 import { ServicesSection } from "@/components/public/ServicesSection";
@@ -21,9 +20,6 @@ export default async function Home() {
     >
       {/* Hero section & video parallax */}
       <HeroSection content={content.hero} siteSettings={content.siteSettings} />
-
-      {/* Marquee logo mitra */}
-      <LogoMarquee content={content.marquee} />
 
       {/* About section & akses tim */}
       <AboutSection content={content.about} />

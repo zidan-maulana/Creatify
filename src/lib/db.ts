@@ -17,6 +17,11 @@ const globalForPrisma = globalThis as unknown as {
 };
 
 const pool = globalForPrisma.pgPool ?? new Pool({ connectionString });
+pool.on("error", (err) => {
+  // Tangkap error tak terduga pada client idle agar tidak menyebabkan unhandled exception
+  console.warn("[Database Pool Warning]:", err.message);
+});
+
 const adapter = new PrismaPg(pool);
 
 export const db =
@@ -25,7 +30,7 @@ export const db =
     adapter,
     log:
       process.env.NODE_ENV === "development"
-        ? ["query", "error", "warn"]
+        ? ["warn"]
         : ["error"],
   });
 

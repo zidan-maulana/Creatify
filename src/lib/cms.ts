@@ -37,7 +37,10 @@ export async function getSiteSettings(): Promise<SiteSettingsContent> {
     const parsed = siteSettingsSchema.safeParse(record.payload);
     return parsed.success ? parsed.data : DEFAULT_SITE_SETTINGS;
   } catch (err) {
-    console.error("Gagal mengambil site_settings dari DB, menggunakan default:", err);
+    console.warn(
+      "[CMS Fallback] Database tidak dapat dijangkau, menggunakan default site_settings:",
+      (err as Error)?.message || err
+    );
     return DEFAULT_SITE_SETTINGS;
   }
 }
@@ -144,7 +147,10 @@ export async function getLandingContent(): Promise<LandingPageContent> {
       contact,
     };
   } catch (err) {
-    console.error("Gagal mengambil landing content dari DB, menggunakan fallback default:", err);
+    console.warn(
+      "[CMS Fallback] Database tidak dapat dijangkau, menggunakan default landing content:",
+      (err as Error)?.message || err
+    );
     return DEFAULT_LANDING_CONTENT;
   }
 }
@@ -201,7 +207,10 @@ export async function getTeamPageContent(): Promise<{
       siteSettings,
     };
   } catch (err) {
-    console.error("Gagal mengambil team page content dari DB, menggunakan fallback default:", err);
+    console.warn(
+      "[CMS Fallback] Database tidak dapat dijangkau, menggunakan default team page content:",
+      (err as Error)?.message || err
+    );
     return {
       content: DEFAULT_TEAM_PAGE_CONTENT,
       siteSettings: DEFAULT_SITE_SETTINGS,

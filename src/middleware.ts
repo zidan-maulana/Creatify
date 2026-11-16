@@ -4,9 +4,17 @@ import { jwtVerify } from "jose";
 const SESSION_COOKIE_NAME = "creatify_admin_session";
 
 function getAuthSecret(): Uint8Array {
-  const secret =
-    process.env.AUTH_SECRET ||
-    "eb4f0cc352c7e11fc8e483c1e1857b5eef9b588ba946481686b3cc0f41f72833";
+  const secret = process.env.AUTH_SECRET;
+  if (!secret) {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error(
+        "[Security Error] AUTH_SECRET wajib didefinisikan pada lingkungan produksi!"
+      );
+    }
+    return new TextEncoder().encode(
+      "dev-fallback-secret-creatify-digital-portfolio-2026-min-32-chars"
+    );
+  }
   return new TextEncoder().encode(secret);
 }
 

@@ -221,29 +221,4 @@ body {
   color: var(--stage-muted, #71717a);
 }
 
-.stage-marquee-label {
-  color: var(--marquee-label, #52525b);
-}
-
-.stage-marquee-logo {
-  color: var(--marquee-logo, #18181b);
-}
-
-.stage-marquee-logo-fill {
-  color: var(--marquee-logo, #18181b);
-  fill: var(--marquee-logo, #18181b);
-}
-
-.stage-marquee-logo-bg {
-  background-color: var(--marquee-logo, #18181b);
-}
-
-.stage-marquee-logo-border {
-  border-color: var(--marquee-logo, #18181b);
-}
-
-.stage-marquee-accent-bg {
-  background-color: var(--marquee-accent, #185adb);
-}
-
 

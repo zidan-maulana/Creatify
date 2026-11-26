@@ -3,6 +3,9 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   experimental: {
     turbopackPluginRuntimeStrategy: "workerThreads",
+    serverActions: {
+      bodySizeLimit: "5mb",
+    },
   },
   turbopack: {
     rules: {

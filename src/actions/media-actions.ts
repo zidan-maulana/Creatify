@@ -70,10 +70,11 @@ export async function uploadMediaAction(
     return successResponse(result, "Gambar berhasil diunggah.");
   } catch (error) {
     console.error("[MediaAction] Galat unggah:", error);
-    return errorResponse(
-      "INTERNAL_ERROR",
-      "Terjadi kendala pada server saat memproses unggah media."
-    );
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Terjadi kendala pada server saat memproses unggah media.";
+    return errorResponse("INTERNAL_ERROR", message);
   }
 }
 
@@ -154,10 +155,11 @@ export async function uploadVideoAction(
     return successResponse(result, "Berkas video berhasil diunggah.");
   } catch (error) {
     console.error("[MediaAction] Galat unggah video:", error);
-    return errorResponse(
-      "INTERNAL_ERROR",
-      "Terjadi kendala pada server saat memproses unggah video."
-    );
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Terjadi kendala pada server saat memproses unggah video.";
+    return errorResponse("INTERNAL_ERROR", message);
   }
 }
 

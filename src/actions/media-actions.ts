@@ -6,9 +6,12 @@ import {
   ACCEPTED_VIDEO_TYPES,
   MAX_FILE_SIZE_BYTES,
   MAX_VIDEO_SIZE_BYTES,
+  isSupabaseStorageActive,
+  createSupabaseSignedUploadUrl,
   uploadMediaBuffer,
   uploadVideoBuffer,
   deleteMediaAsset,
+  type SignedUploadResult,
   type UploadMediaResult,
 } from "@/lib/media";
 import {
@@ -105,6 +108,72 @@ export async function deleteMediaAction(
       "INTERNAL_ERROR",
       "Gagal menghapus aset media dari storage."
     );
+  }
+}
+
+export type CreateSignedVideoUploadResult =
+  | SignedUploadResult
+  | { useServerUpload: true };
+
+/**
+ * Server Action: Buat Signed Upload URL untuk Video MP4/WebM/MOV (Direct-to-Supabase)
+ * Menghindari batas body payload 4.5 MB pada Serverless Function Vercel.
+ */
+export async function createSignedVideoUploadAction(
+  fileName: string,
+  fileType: string,
+  fileSize: number
+): Promise<ApiResponse<CreateSignedVideoUploadResult>> {
+  try {
+    const session = await getSessionFromCookie();
+    if (!session) {
+      return errorResponse(
+        "UNAUTHORIZED",
+        "Anda harus masuk sebagai administrator untuk mengunggah berkas video."
+      );
+    }
+
+    const lowerName = fileName.toLowerCase();
+    const isValidType =
+      (ACCEPTED_VIDEO_TYPES as readonly string[]).includes(fileType) ||
+      (!fileType &&
+        (lowerName.endsWith(".mp4") ||
+          lowerName.endsWith(".webm") ||
+          lowerName.endsWith(".mov")));
+    if (!isValidType) {
+      return errorResponse(
+        "VALIDATION_ERROR",
+        "Format berkas tidak didukung. Gunakan format MP4, WebM, atau MOV."
+      );
+    }
+
+    if (!fileSize || fileSize > MAX_VIDEO_SIZE_BYTES) {
+      return errorResponse(
+        "VALIDATION_ERROR",
+        "Ukuran video melebihi batas maksimal 50 MB."
+      );
+    }
+
+    if (isSupabaseStorageActive()) {
+      const signed = await createSupabaseSignedUploadUrl(
+        fileName,
+        "creatify/videos",
+        fileType || "video/mp4"
+      );
+      return successResponse(signed, "Signed upload URL video siap digunakan.");
+    }
+
+    return successResponse(
+      { useServerUpload: true },
+      "Menggunakan unggahan melalui server."
+    );
+  } catch (error) {
+    console.error("[MediaAction] Galat membuat signed upload video:", error);
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Terjadi kendala pada server saat menyiapkan unggah video.";
+    return errorResponse("INTERNAL_ERROR", message);
   }
 }
 

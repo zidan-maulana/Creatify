@@ -12,7 +12,10 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { sanitizeVideoUrl } from "@/lib/video";
-import { uploadVideoAction } from "@/actions/media-actions";
+import {
+  createSignedVideoUploadAction,
+  uploadVideoAction,
+} from "@/actions/media-actions";
 
 interface AdminVideoUploadProps {
   id: string;
@@ -63,6 +66,46 @@ export function AdminVideoUpload({
 
     setIsUploading(true);
     try {
+      // 1. Minta Signed Upload URL (untuk upload langsung ke Supabase Storage agar bebas batas 4.5 MB Vercel)
+      const signRes = await createSignedVideoUploadAction(
+        file.name,
+        file.type,
+        file.size
+      );
+
+      if (!signRes.success) {
+        setUploadError(signRes.error.message || "Gagal menyiapkan unggah video.");
+        return;
+      }
+
+      if ("signedUrl" in signRes.data) {
+        const directRes = await fetch(signRes.data.signedUrl, {
+          method: "PUT",
+          headers: {
+            "Content-Type": signRes.data.contentType || file.type || "video/mp4",
+          },
+          body: file,
+        });
+
+        if (!directRes.ok) {
+          const errText = await directRes.text().catch(() => "");
+          let errMsg = `Gagal mengunggah video ke cloud storage (HTTP ${directRes.status}).`;
+          try {
+            const parsed = JSON.parse(errText);
+            if (parsed.message || parsed.error) {
+              errMsg = parsed.message || parsed.error;
+            }
+          } catch {}
+          setUploadError(errMsg);
+          return;
+        }
+
+        onChange(signRes.data.publicUrl);
+        setActiveTab("upload");
+        return;
+      }
+
+      // 2. Fallback ke server upload (hanya jika Supabase Storage belum aktif, misal localhost)
       const formData = new FormData();
       formData.append("file", file);
 
@@ -75,9 +118,15 @@ export function AdminVideoUpload({
       onChange(res.data.url);
       setActiveTab("upload");
     } catch (err) {
-      setUploadError(
-        err instanceof Error ? err.message : "Terjadi kendala saat mengunggah video."
-      );
+      const msg =
+        err instanceof Error ? err.message : "Terjadi kendala saat mengunggah video.";
+      if (msg.toLowerCase().includes("unexpected response")) {
+        setUploadError(
+          "Ukuran video melebihi batas unggahan server. Gunakan video di bawah 4.5 MB atau tautan YouTube/Vimeo."
+        );
+      } else {
+        setUploadError(msg);
+      }
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) {

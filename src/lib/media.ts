@@ -28,6 +28,37 @@ export interface UploadMediaResult {
   publicId: string;
 }
 
+export interface SignedUploadResult {
+  signedUrl: string;
+  publicUrl: string;
+  publicId: string;
+  contentType: string;
+}
+
+function getSupabaseStorageConfig() {
+  const baseUrl = (
+    process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || ""
+  ).replace(/\/+$/, "");
+  const apiKey =
+    process.env.SUPABASE_SERVICE_ROLE_KEY ||
+    process.env.SUPABASE_ANON_KEY ||
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+    "";
+  const bucket = process.env.SUPABASE_STORAGE_BUCKET || "creatify-media";
+  return { baseUrl, apiKey, bucket };
+}
+
+async function parseSupabaseError(res: Response, fallback: string): Promise<string> {
+  const errorText = await res.text().catch(() => "");
+  if (!errorText) return fallback;
+  try {
+    const parsed = JSON.parse(errorText);
+    return parsed.message || parsed.error || errorText;
+  } catch {
+    return errorText;
+  }
+}
+
 export function isCloudinaryActive(): boolean {
   return Boolean(
     process.env.CLOUDINARY_CLOUD_NAME &&
@@ -37,12 +68,8 @@ export function isCloudinaryActive(): boolean {
 }
 
 export function isSupabaseStorageActive(): boolean {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
-  const key =
-    process.env.SUPABASE_SERVICE_ROLE_KEY ||
-    process.env.SUPABASE_ANON_KEY ||
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  return Boolean(url && key);
+  const { baseUrl, apiKey } = getSupabaseStorageConfig();
+  return Boolean(baseUrl && apiKey);
 }
 
 // Inisialisasi konfigurasi Cloudinary jika variabel lingkungan terisi
@@ -76,6 +103,66 @@ function getMimeType(fileName: string, defaultType: string): string {
   }
 }
 
+function buildSupabaseObjectTarget(
+  fileName: string,
+  folder: string,
+  defaultType: string
+) {
+  const { baseUrl, apiKey, bucket } = getSupabaseStorageConfig();
+  const ext =
+    path.extname(fileName) ||
+    (defaultType.startsWith("video") ? ".mp4" : ".webp");
+  const uniqueId = `${Date.now()}-${crypto.randomBytes(6).toString("hex")}`;
+  const filePath = `${folder}/${uniqueId}${ext}`;
+  const contentType = getMimeType(fileName, defaultType);
+  const publicUrl = `${baseUrl}/storage/v1/object/public/${bucket}/${filePath}`;
+  const publicId = `supabase:${bucket}/${filePath}`;
+  return { baseUrl, apiKey, bucket, filePath, contentType, publicUrl, publicId };
+}
+
+/**
+ * Membuat Signed Upload URL Supabase Storage agar file besar (mis. video 5-50 MB)
+ * dapat diunggah langsung dari browser tanpa melewati batas payload 4.5 MB Vercel.
+ */
+export async function createSupabaseSignedUploadUrl(
+  fileName: string,
+  folder = "creatify/videos",
+  defaultType = "video/mp4"
+): Promise<SignedUploadResult> {
+  const { baseUrl, apiKey, bucket, filePath, contentType, publicUrl, publicId } =
+    buildSupabaseObjectTarget(fileName, folder, defaultType);
+
+  const signEndpoint = `${baseUrl}/storage/v1/object/upload/sign/${bucket}/${filePath}`;
+  const res = await fetch(signEndpoint, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      apikey: apiKey,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ expiresIn: 600 }),
+  });
+
+  if (!res.ok) {
+    const msg = await parseSupabaseError(res, `HTTP ${res.status}`);
+    throw new Error(
+      `Gagal membuat tautan unggah Supabase Storage (bucket: ${bucket}): ${msg}`
+    );
+  }
+
+  const data = (await res.json()) as { url?: string };
+  if (!data?.url) {
+    throw new Error("Respons Supabase Storage tidak menyertakan signed URL.");
+  }
+
+  return {
+    signedUrl: `${baseUrl}/storage/v1${data.url}`,
+    publicUrl,
+    publicId,
+    contentType,
+  };
+}
+
 /**
  * Mengunggah berkas buffer ke Supabase Storage via REST API
  */
@@ -85,22 +172,8 @@ async function uploadToSupabaseStorage(
   folder = "images",
   defaultType = "image/webp"
 ): Promise<UploadMediaResult> {
-  const baseUrl = (
-    process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || ""
-  ).replace(/\/+$/, "");
-  const apiKey =
-    process.env.SUPABASE_SERVICE_ROLE_KEY ||
-    process.env.SUPABASE_ANON_KEY ||
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-    "";
-  const bucket = process.env.SUPABASE_STORAGE_BUCKET || "creatify-media";
-
-  const ext =
-    path.extname(fileName) ||
-    (defaultType.startsWith("video") ? ".mp4" : ".webp");
-  const uniqueId = `${Date.now()}-${crypto.randomBytes(6).toString("hex")}`;
-  const filePath = `${folder}/${uniqueId}${ext}`;
-  const contentType = getMimeType(fileName, defaultType);
+  const { baseUrl, apiKey, bucket, filePath, contentType, publicUrl, publicId } =
+    buildSupabaseObjectTarget(fileName, folder, defaultType);
 
   const endpoint = `${baseUrl}/storage/v1/object/${bucket}/${filePath}`;
 
@@ -116,21 +189,15 @@ async function uploadToSupabaseStorage(
   });
 
   if (!res.ok) {
-    const errorText = await res.text();
-    let msg = errorText;
-    try {
-      const parsed = JSON.parse(errorText);
-      msg = parsed.message || parsed.error || errorText;
-    } catch {}
+    const msg = await parseSupabaseError(res, `HTTP ${res.status}`);
     throw new Error(
       `Gagal mengunggah ke Supabase Storage (bucket: ${bucket}): ${msg}`
     );
   }
 
-  const publicUrl = `${baseUrl}/storage/v1/object/public/${bucket}/${filePath}`;
   return {
     url: publicUrl,
-    publicId: `supabase:${bucket}/${filePath}`,
+    publicId,
   };
 }
 
@@ -286,14 +353,7 @@ export async function deleteMediaAsset(publicId: string): Promise<boolean> {
       const bucket = rawPath.slice(0, slashIdx);
       const filePath = rawPath.slice(slashIdx + 1);
 
-      const baseUrl = (
-        process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL || ""
-      ).replace(/\/+$/, "");
-      const apiKey =
-        process.env.SUPABASE_SERVICE_ROLE_KEY ||
-        process.env.SUPABASE_ANON_KEY ||
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-        "";
+      const { baseUrl, apiKey } = getSupabaseStorageConfig();
 
       if (!baseUrl || !apiKey) return true;
 
